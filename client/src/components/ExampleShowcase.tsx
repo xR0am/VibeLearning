@@ -14,6 +14,13 @@ export default function ExampleShowcase() {
       repoUrl: "github.com/facebook/react",
       model: "Claude 3 Opus",
       tags: ["Frontend", "Data Fetching", "Performance"]
+    },
+    {
+      title: "Understanding llms.txt Standard",
+      repoUrl: "llmstxt.org/llms.txt",
+      model: "GPT-4o",
+      tags: ["Documentation", "LLM", "Standards", "llms.txt"],
+      url: "https://llmstxt.org"
     }
   ];
   
@@ -21,7 +28,7 @@ export default function ExampleShowcase() {
     <div className="bg-white rounded-lg shadow-md p-6 mb-8">
       <h3 className="text-xl font-bold text-gray-900 mb-4">Example Generated Courses</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {examples.map((example, index) => (
           <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
             <div className="p-4 border-b border-gray-200 bg-gray-50">

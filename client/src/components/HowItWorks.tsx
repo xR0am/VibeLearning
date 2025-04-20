@@ -2,13 +2,13 @@ export default function HowItWorks() {
   const steps = [
     {
       icon: "fas fa-link",
-      title: "1. Provide Repository",
-      description: "Enter a GitHub URL or tool name along with your specific use case or learning goals."
+      title: "1. Provide Source",
+      description: "Enter a GitHub repository URL or website with llms.txt along with your specific use case."
     },
     {
       icon: "fas fa-robot",
       title: "2. AI Analysis",
-      description: "OpenRouter's AI analyzes documentation, code, and best practices for the tool."
+      description: "OpenRouter's AI analyzes the repository or llms.txt content to understand the tool or concept."
     },
     {
       icon: "fas fa-graduation-cap",
@@ -33,6 +33,15 @@ export default function HowItWorks() {
             </p>
           </div>
         ))}
+      </div>
+      
+      <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <h4 className="font-medium text-gray-900 mb-2">What is llms.txt?</h4>
+        <p className="text-sm text-gray-600">
+          llms.txt is a growing standard that provides LLM-friendly content on websites. 
+          It's a markdown file that offers brief background information and guidance for large language models.
+          Learn more at <a href="https://llmstxt.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">llmstxt.org</a>.
+        </p>
       </div>
     </div>
   );
