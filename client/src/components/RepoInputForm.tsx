@@ -32,7 +32,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
       sourceUrl: "",
       sourceType: "github",
       context: "",
-      model: "anthropic/claude-3-opus",
+      model: "deepseek/deepseek-chat-v3-0324:free",
     },
   });
   
@@ -153,6 +153,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
               {...register("model")}
               className="block w-full pl-3 pr-10 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary appearance-none"
             >
+              <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek Chat v3 (Free)</option>
               <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
               <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
               <option value="google/gemini-1.5-pro">Gemini 1.5 Pro</option>
@@ -187,7 +188,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
         </div>
         
         <div className="text-xs text-gray-500 text-center">
-          <p>Powered by OpenRouter API | Usage costs apply based on model selection</p>
+          <p>Powered by OpenRouter API | DeepSeek is free, other models have usage costs</p>
         </div>
       </form>
     </div>

@@ -9,11 +9,25 @@ export default function Header() {
             </span>
             <h1 className="text-2xl font-bold text-gray-800">DevCourse</h1>
           </div>
-          <div className="flex items-center text-sm">
-            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center">
-              <span className="h-2 w-2 bg-green-500 rounded-full mr-1"></span>
-              OpenRouter Connected
-            </span>
+          <div className="flex items-center space-x-3">
+            <div className="hidden sm:flex items-center text-sm">
+              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center">
+                <i className="fab fa-github mr-1 text-xs"></i>
+                GitHub
+              </span>
+            </div>
+            <div className="hidden sm:flex items-center text-sm">
+              <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center">
+                <i className="fas fa-file-alt mr-1 text-xs"></i>
+                llms.txt
+              </span>
+            </div>
+            <div className="flex items-center text-sm">
+              <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full flex items-center">
+                <span className="h-2 w-2 bg-purple-500 rounded-full mr-1"></span>
+                OpenRouter
+              </span>
+            </div>
           </div>
         </div>
       </div>
