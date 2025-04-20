@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { generateCourseRequestSchema } from "@shared/schema";
 import { fetchRepositoryInfo } from "./github";
+import { fetchLlmsTxtContent } from "./llms-txt";
 import { generateCourseWithOpenRouter } from "./openrouter";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -12,20 +13,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Validate request body
       const validatedData = generateCourseRequestSchema.parse(req.body);
-      const { repoUrl, context, model } = validatedData;
+      const { sourceUrl, sourceType, context, model } = validatedData;
       
-      // Fetch repository information from GitHub
-      const repoInfo = await fetchRepositoryInfo(repoUrl);
+      // Fetch source information based on the source type
+      let sourceInfo: string;
+      if (sourceType === "github") {
+        sourceInfo = await fetchRepositoryInfo(sourceUrl);
+      } else if (sourceType === "llms-txt") {
+        sourceInfo = await fetchLlmsTxtContent(sourceUrl);
+      } else {
+        throw new Error(`Unsupported source type: ${sourceType}`);
+      }
       
       // Generate course content using OpenRouter
-      const courseContentJson = await generateCourseWithOpenRouter(repoInfo, context, model);
+      const courseContentJson = await generateCourseWithOpenRouter(sourceInfo, context, model);
       
       // Parse the JSON response from OpenRouter
       try {
         const courseContent = JSON.parse(courseContentJson);
         
-        // Add the repo URL and context to the course content
-        courseContent.repoUrl = repoUrl;
+        // Add the source URL and context to the course content
+        courseContent.repoUrl = sourceUrl; // Still using repoUrl for compatibility
         courseContent.context = context;
         
         // Return the course content

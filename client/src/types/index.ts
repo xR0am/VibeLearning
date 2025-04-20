@@ -11,8 +11,11 @@ export interface CourseContent {
   steps: Step[];
 }
 
+export type SourceType = "github" | "llms-txt";
+
 export interface GenerateCourseRequest {
-  repoUrl: string;
+  sourceUrl: string;
+  sourceType: SourceType;
   context: string;
   model: string;
 }

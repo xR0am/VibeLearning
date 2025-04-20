@@ -21,7 +21,7 @@ interface OpenRouterResponse {
 }
 
 export async function generateCourseWithOpenRouter(
-  repoInfo: string,
+  sourceInfo: string,
   context: string,
   model: string
 ): Promise<string> {
@@ -32,9 +32,9 @@ export async function generateCourseWithOpenRouter(
   }
   
   const systemPrompt = `
-You are an expert developer educator. Your task is to create a comprehensive, step-by-step learning course for a developer who wants to understand and implement a specific tool or repository.
+You are an expert developer educator. Your task is to create a comprehensive, step-by-step learning course for a developer who wants to understand and implement a specific tool, repository, or content from llms.txt.
 
-Based on the provided repository information and user context, create a structured course with 5-7 logical steps. Each step should build on the previous one and help the user achieve their specific goals.
+Based on the provided source information (either repository details or llms.txt content) and user context, create a structured course with 5-7 logical steps. Each step should build on the previous one and help the user achieve their specific goals.
 
 Format your response as a JSON object with the following structure:
 {
@@ -64,8 +64,8 @@ Make sure:
 `;
 
   const userPrompt = `
-Repository/Tool Information:
-${repoInfo}
+Source Information:
+${sourceInfo}
 
 User Context/Use Case:
 ${context}

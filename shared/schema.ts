@@ -53,9 +53,14 @@ export const courseContentSchema = z.object({
 
 export type CourseContent = z.infer<typeof courseContentSchema>;
 
+// Source Type Enum
+export const sourceTypeEnum = z.enum(["github", "llms-txt"]);
+export type SourceType = z.infer<typeof sourceTypeEnum>;
+
 // Generate Course Request Schema
 export const generateCourseRequestSchema = z.object({
-  repoUrl: z.string().min(1, "Repository URL is required"),
+  sourceUrl: z.string().min(1, "Source URL is required"),
+  sourceType: sourceTypeEnum,
   context: z.string().min(1, "Context is required"),
   model: z.string().min(1, "Model is required"),
 });

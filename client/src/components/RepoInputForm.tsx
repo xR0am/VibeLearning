@@ -5,10 +5,13 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
-import { CourseContent } from "@/types";
+import { CourseContent, SourceType } from "@/types";
 
 const formSchema = z.object({
-  repoUrl: z.string().min(1, { message: "Repository URL is required" }),
+  sourceUrl: z.string().min(1, { message: "Source URL is required" }),
+  sourceType: z.enum(["github", "llms-txt"], {
+    required_error: "Source type is required",
+  }),
   context: z.string().min(1, { message: "Context is required" }),
   model: z.string().min(1, { message: "Model selection is required" }),
 });
@@ -21,15 +24,23 @@ interface RepoInputFormProps {
 
 export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps) {
   const { toast } = useToast();
+  const [sourceType, setSourceType] = useState<SourceType>("github");
   
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      repoUrl: "",
+      sourceUrl: "",
+      sourceType: "github",
       context: "",
       model: "anthropic/claude-3-opus",
     },
   });
+  
+  // Update the form value when the sourceType state changes
+  const handleSourceTypeChange = (type: SourceType) => {
+    setSourceType(type);
+    setValue("sourceType", type);
+  };
   
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
@@ -59,19 +70,61 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-8">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="flex space-x-2 mb-2">
+          <button
+            type="button"
+            onClick={() => handleSourceTypeChange("github")}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${
+              sourceType === "github"
+                ? "bg-primary text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            GitHub Repository
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSourceTypeChange("llms-txt")}
+            className={`px-4 py-2 rounded-md text-sm font-medium ${
+              sourceType === "llms-txt"
+                ? "bg-primary text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            llms.txt
+          </button>
+          
+          {/* Hidden field to store the source type */}
+          <input 
+            type="hidden" 
+            {...register("sourceType")} 
+          />
+        </div>
+        
         <div>
-          <label htmlFor="repoUrl" className="block text-sm font-medium text-gray-700 mb-1">
-            GitHub Repository URL or Tool Name
+          <label htmlFor="sourceUrl" className="block text-sm font-medium text-gray-700 mb-1">
+            {sourceType === "github" 
+              ? "GitHub Repository URL" 
+              : "Website or llms.txt URL"}
           </label>
           <input 
-            id="repoUrl"
-            {...register("repoUrl")}
-            placeholder="https://github.com/username/repo or Tool Name"
+            id="sourceUrl"
+            {...register("sourceUrl")}
+            placeholder={
+              sourceType === "github"
+                ? "https://github.com/username/repo"
+                : "https://example.com or https://example.com/llms.txt"
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
           />
-          {errors.repoUrl && (
-            <p className="mt-1 text-sm text-red-600">{errors.repoUrl.message}</p>
+          {errors.sourceUrl && (
+            <p className="mt-1 text-sm text-red-600">{errors.sourceUrl.message}</p>
           )}
+          <p className="mt-1 text-xs text-gray-500">
+            {sourceType === "github" 
+              ? "Enter a GitHub repository URL to generate a course about it." 
+              : "Enter a website URL to fetch llms.txt or provide a direct link to an llms.txt file."}
+          </p>
         </div>
         
         <div>
