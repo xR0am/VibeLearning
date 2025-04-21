@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CourseContent, SourceType } from "@/types";
 
 const formSchema = z.object({
@@ -24,6 +24,7 @@ interface RepoInputFormProps {
 
 export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [sourceType, setSourceType] = useState<SourceType>("github");
   
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormData>({
