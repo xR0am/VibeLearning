@@ -1,6 +1,14 @@
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { CourseContent as CourseContentType } from "@/types";
 import ReactMarkdown from 'react-markdown';
+import { Download, ChevronLeft, ChevronRight, Code, FileText, ExternalLink } from 'lucide-react';
+import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CourseContentProps {
   content: CourseContentType;
@@ -14,6 +22,28 @@ export default function CourseContent({
   setActiveStepIndex 
 }: CourseContentProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [progressValue, setProgressValue] = useState(0);
+  
+  useEffect(() => {
+    // Animate progress bar
+    const progress = ((activeStepIndex + 1) / content.steps.length) * 100;
+    const animationDuration = 400; // ms
+    const frames = 20;
+    const increment = (progress - progressValue) / frames;
+    
+    let frame = 0;
+    const interval = setInterval(() => {
+      if (frame < frames) {
+        setProgressValue(prev => prev + increment);
+        frame++;
+      } else {
+        setProgressValue(progress);
+        clearInterval(interval);
+      }
+    }, animationDuration / frames);
+    
+    return () => clearInterval(interval);
+  }, [activeStepIndex, content.steps.length, progressValue]);
   
   const handleStepChange = (index: number) => {
     setActiveStepIndex(index);
@@ -24,7 +54,6 @@ export default function CourseContent({
   };
   
   const activeStep = content.steps[activeStepIndex];
-  const progressPercentage = ((activeStepIndex + 1) / content.steps.length) * 100;
   
   const handlePrevious = () => {
     if (activeStepIndex > 0) {
@@ -60,100 +89,146 @@ export default function CourseContent({
   };
   
   return (
-    <div ref={contentRef} className="bg-white rounded-lg shadow-md mb-8">
-      {/* Course Header */}
-      <div className="border-b border-gray-200 p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">{content.title}</h2>
-            <div className="mt-1 flex items-center text-sm text-gray-500">
-              <span className="flex items-center">
-                <i className="fas fa-code-branch mr-1"></i>
-                <a href={content.repoUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  {content.repoUrl.replace(/^https?:\/\//i, '')}
-                </a>
-              </span>
-              <span className="mx-2">•</span>
-              <span className="italic">{content.context}</span>
+    <div ref={contentRef} className="mb-8 w-full max-w-5xl mx-auto">
+      <Card className="border shadow-lg card-shadow">
+        <CardHeader className="pb-4">
+          <div className="flex justify-between items-start flex-wrap gap-4">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-bold gradient-heading">{content.title}</h2>
+              <div className="flex items-center text-sm text-muted-foreground flex-wrap gap-2">
+                <div className="flex items-center">
+                  <Code className="mr-1 h-4 w-4" />
+                  <a 
+                    href={content.repoUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-primary hover:underline inline-flex items-center"
+                  >
+                    {content.repoUrl.replace(/^https?:\/\//i, '')}
+                    <ExternalLink className="ml-1 h-3 w-3" />
+                  </a>
+                </div>
+                <Badge variant="outline" className="flex items-center">
+                  <FileText className="mr-1 h-3 w-3" />
+                  {content.context}
+                </Badge>
+              </div>
             </div>
-          </div>
-          <div>
-            <button 
+            <Button 
+              variant="outline" 
+              size="sm" 
               onClick={exportAsMD}
-              className="text-gray-400 hover:text-gray-500 focus:outline-none"
+              className="flex items-center gap-1"
             >
-              <i className="fas fa-download mr-1"></i>
-              <span className="text-sm">Export as MD</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Course Navigation */}
-      <div className="border-b border-gray-200 bg-gray-50 overflow-x-auto">
-        <div className="px-6 py-2 flex items-center">
-          <div className="mr-4 whitespace-nowrap">
-            <span className="text-sm font-medium text-gray-700">Progress:</span>
-            <div className="mt-1 w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-accent" 
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </div>
+              <Download className="h-4 w-4" />
+              <span>Export</span>
+            </Button>
           </div>
           
-          {content.steps.map((step, index) => (
-            <button 
-              key={step.id}
-              onClick={() => handleStepChange(index)}
-              className={`mr-2 px-3 py-1 text-sm rounded-md ${
-                index === activeStepIndex 
-                  ? 'bg-accent text-white font-medium' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Step {index + 1}
-            </button>
-          ))}
-        </div>
-      </div>
-      
-      {/* Course Step Content */}
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">{activeStep.title}</h3>
+          <div className="mt-6 space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="font-medium">Progress</span>
+              <span className="text-muted-foreground">
+                Step {activeStepIndex + 1} of {content.steps.length}
+              </span>
+            </div>
+            <Progress value={progressValue} className="h-2" />
+          </div>
+        </CardHeader>
         
-        <div className="prose max-w-none">
-          <ReactMarkdown>
-            {activeStep.content}
-          </ReactMarkdown>
+        <Separator />
+        
+        <div className="px-6 pt-4 pb-2 overflow-x-auto">
+          <div className="flex space-x-2">
+            {content.steps.map((step, index) => (
+              <Button 
+                key={step.id}
+                onClick={() => handleStepChange(index)}
+                variant={index === activeStepIndex ? "default" : "outline"}
+                size="sm"
+                className={`whitespace-nowrap transition-all duration-200 ${
+                  index === activeStepIndex ? "scale-105" : ""
+                }`}
+              >
+                {index + 1}. {step.title.length > 20 ? `${step.title.substring(0, 20)}...` : step.title}
+              </Button>
+            ))}
+          </div>
         </div>
         
-        {/* Step Navigation */}
-        <div className="mt-8 flex justify-between">
-          <button 
+        <Tabs defaultValue="content" className="px-6">
+          <TabsList className="mb-2">
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="content" className="focus-visible:outline-none focus-visible:ring-0">
+            <CardContent className="p-0">
+              <div className="step-card my-2 step-card-active">
+                <h3 className="text-xl font-bold mb-4">{activeStep.title}</h3>
+                
+                <ScrollArea className="custom-scrollbar h-[400px] pr-4">
+                  <div className="prose dark:prose-invert max-w-none">
+                    <ReactMarkdown>
+                      {activeStep.content}
+                    </ReactMarkdown>
+                  </div>
+                </ScrollArea>
+              </div>
+            </CardContent>
+          </TabsContent>
+          
+          <TabsContent value="overview" className="focus-visible:outline-none focus-visible:ring-0">
+            <CardContent className="p-0">
+              <div className="my-2 space-y-4">
+                <ScrollArea className="custom-scrollbar h-[400px] pr-4">
+                  <div className="space-y-4">
+                    {content.steps.map((step, index) => (
+                      <div 
+                        key={step.id} 
+                        className={`step-card cursor-pointer transition-all ${
+                          index === activeStepIndex ? "step-card-active" : ""
+                        }`}
+                        onClick={() => handleStepChange(index)}
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="font-medium">Step {index + 1}: {step.title}</h4>
+                          {index === activeStepIndex && (
+                            <Badge variant="default">Current</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {step.content.substring(0, 150)}...
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </CardContent>
+          </TabsContent>
+        </Tabs>
+        
+        <CardFooter className="flex justify-between pt-2 pb-6">
+          <Button 
             onClick={handlePrevious}
             disabled={activeStepIndex === 0}
-            className={`px-4 py-2 border border-gray-300 rounded-md text-sm font-medium ${
-              activeStepIndex === 0 
-              ? 'opacity-50 cursor-not-allowed bg-white text-gray-400' 
-              : 'text-gray-700 bg-white hover:bg-gray-50'
-            }`}
+            variant="outline"
+            className="flex items-center gap-1"
           >
-            <i className="fas fa-arrow-left mr-1"></i> Previous
-          </button>
-          <button 
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          <Button 
             onClick={handleNext}
             disabled={activeStepIndex === content.steps.length - 1}
-            className={`px-4 py-2 border rounded-md shadow-sm text-sm font-medium ${
-              activeStepIndex === content.steps.length - 1 
-              ? 'opacity-50 cursor-not-allowed border-gray-300 bg-white text-gray-400' 
-              : 'border-transparent text-white bg-primary hover:bg-blue-600'
-            }`}
+            className="flex items-center gap-1"
           >
-            Next <i className="fas fa-arrow-right ml-1"></i>
-          </button>
-        </div>
-      </div>
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
