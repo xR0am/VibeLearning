@@ -211,9 +211,9 @@ export default function CourseContent({
                           {step.title}
                         </div>
                         {index === activeStepIndex && (
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            {step.content.substring(0, 80)}...
-                          </p>
+                          <Badge variant="secondary" className="mt-1 text-xs">
+                            Current
+                          </Badge>
                         )}
                       </div>
                     </div>
