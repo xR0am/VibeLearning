@@ -3,10 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { Course } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { getQueryFn } from "@/lib/queryClient";
+import { ChevronDown, ChevronUp, Calendar, Bot, Sparkles, BookOpen } from "lucide-react";
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardContent 
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function SavedCourses({ onSelectCourse }: { onSelectCourse: (course: any) => void }) {
   const { toast } = useToast();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const { data: courses, isLoading, error } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
@@ -30,58 +40,72 @@ export default function SavedCourses({ onSelectCourse }: { onSelectCourse: (cour
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="flex justify-between items-center w-full"
-      >
-        <h2 className="text-lg font-semibold text-gray-800">
-          Saved Courses {courses?.length ? `(${courses.length})` : ""}
-        </h2>
-        <span className="text-gray-500">
-          <i className={`fas fa-chevron-${isExpanded ? "up" : "down"}`}></i>
-        </span>
-      </button>
+    <Card className="border shadow-lg card-shadow mb-6">
+      <CardHeader className="py-4 px-5">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <span>Saved Courses {courses?.length ? `(${courses.length})` : ""}</span>
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="h-8 w-8 p-0 rounded-full"
+          >
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </CardHeader>
 
       {isExpanded && (
-        <div className="mt-4">
+        <CardContent className="pt-0">
           {isLoading ? (
             <div className="py-8 flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <Sparkles className="h-8 w-8 animate-pulse text-primary" />
             </div>
           ) : courses && courses.length > 0 ? (
-            <div className="space-y-3 max-h-80 overflow-y-auto">
-              {courses.map((course) => (
-                <div
-                  key={course.id}
-                  className="p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => handleCourseSelect(course)}
-                >
-                  <h3 className="font-medium text-gray-800">{course.title}</h3>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                      <i className="mr-1 text-xs fas fa-calendar-alt"></i>
-                      {new Date(course.createdAt).toLocaleDateString()}
-                    </span>
-                    <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                      <i className="mr-1 text-xs fas fa-robot"></i>
-                      {course.modelUsed.split("/").pop()?.replace(":free", " (Free)")}
-                    </span>
+            <ScrollArea className="h-[280px] custom-scrollbar">
+              <div className="space-y-3 pr-3">
+                {courses.map((course) => (
+                  <div
+                    key={course.id}
+                    className="p-4 border border-border rounded-md hover:bg-accent/10 hover:border-primary/40 cursor-pointer transition-all duration-200 step-card"
+                    onClick={() => handleCourseSelect(course)}
+                  >
+                    <h3 className="font-medium">{course.title}</h3>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Badge variant="outline" className="flex items-center gap-1 bg-blue-50/30 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+                        <Calendar className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                        {new Date(course.createdAt).toLocaleDateString()}
+                      </Badge>
+                      <Badge variant="outline" className="flex items-center gap-1 bg-purple-50/30 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
+                        <Bot className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                        {course.modelUsed.split("/").pop()?.replace(":free", " (Free)")}
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </ScrollArea>
           ) : (
-            <div className="py-6 text-center text-gray-500">
+            <div className="py-6 text-center text-muted-foreground">
               {error ? (
                 <p>Failed to load courses. Please try again later.</p>
               ) : (
-                <p>No saved courses yet. Generate a course to see it here!</p>
+                <div className="space-y-2">
+                  <BookOpen className="h-12 w-12 opacity-20 mx-auto" />
+                  <p>No saved courses yet. Generate a course to see it here!</p>
+                </div>
               )}
             </div>
           )}
-        </div>
+        </CardContent>
       )}
-    </div>
+    </Card>
   );
 }
