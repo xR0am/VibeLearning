@@ -6,6 +6,29 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CourseContent, SourceType } from "@/types";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage, 
+  FormDescription 
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Github, FileText, Loader2, Sparkles, Bot } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const formSchema = z.object({
   sourceUrl: z.string().min(1, { message: "Source URL is required" }),
@@ -27,7 +50,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   const queryClient = useQueryClient();
   const [sourceType, setSourceType] = useState<SourceType>("github");
   
-  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormData>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       sourceUrl: "",
@@ -40,7 +63,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   // Update the form value when the sourceType state changes
   const handleSourceTypeChange = (type: SourceType) => {
     setSourceType(type);
-    setValue("sourceType", type);
+    form.setValue("sourceType", type);
   };
   
   const { mutate, isPending } = useMutation({
@@ -72,129 +95,174 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   };
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="flex space-x-2 mb-2">
-          <button
-            type="button"
-            onClick={() => handleSourceTypeChange("github")}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              sourceType === "github"
-                ? "bg-primary text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            GitHub Repository
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSourceTypeChange("llms-txt")}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              sourceType === "llms-txt"
-                ? "bg-primary text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            llms.txt
-          </button>
-          
-          {/* Hidden field to store the source type */}
-          <input 
-            type="hidden" 
-            {...register("sourceType")} 
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="sourceUrl" className="block text-sm font-medium text-gray-700 mb-1">
-            {sourceType === "github" 
-              ? "GitHub Repository URL" 
-              : "Website or llms.txt URL"}
-          </label>
-          <input 
-            id="sourceUrl"
-            {...register("sourceUrl")}
-            placeholder={
-              sourceType === "github"
-                ? "https://github.com/username/repo"
-                : "https://example.com or https://example.com/llms.txt"
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-          />
-          {errors.sourceUrl && (
-            <p className="mt-1 text-sm text-red-600">{errors.sourceUrl.message}</p>
-          )}
-          <p className="mt-1 text-xs text-gray-500">
-            {sourceType === "github" 
-              ? "Enter a GitHub repository URL to generate a course about it." 
-              : "Enter a website URL to fetch llms.txt or provide a direct link to an llms.txt file."}
-          </p>
-        </div>
-        
-        <div>
-          <label htmlFor="context" className="block text-sm font-medium text-gray-700 mb-1">
-            Your Use Case / Context
-          </label>
-          <textarea 
-            id="context"
-            {...register("context")} 
-            rows={4} 
-            placeholder="Describe your specific use case, technical requirements, or what you want to achieve with this tool."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-          />
-          {errors.context && (
-            <p className="mt-1 text-sm text-red-600">{errors.context.message}</p>
-          )}
-        </div>
-        
-        <div>
-          <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
-            Select OpenRouter LLM
-          </label>
-          <div className="relative">
-            <select 
-              id="model"
-              {...register("model")}
-              className="block w-full pl-3 pr-10 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary appearance-none"
-            >
-              <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek Chat v3 (Free)</option>
-              <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
-              <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
-              <option value="google/gemini-1.5-pro">Gemini 1.5 Pro</option>
-              <option value="google/gemini-pro">Gemini Pro</option>
-              <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
-              <option value="openai/gpt-4o">GPT-4o</option>
-              <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
-              <option value="meta-llama/llama-3-70b-instruct">Llama 3 70B</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <i className="fas fa-chevron-down text-xs"></i>
+    <Card className="border shadow-lg card-shadow mb-8">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold gradient-heading flex items-center gap-2">
+          <Sparkles className="h-5 w-5" />
+          Generate Custom Course
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <span className="text-sm font-medium mr-2">Source Type:</span>
+                <ToggleGroup type="single" value={sourceType} onValueChange={(value) => value && handleSourceTypeChange(value as SourceType)}>
+                  <ToggleGroupItem value="github" aria-label="GitHub" className="flex items-center gap-1">
+                    <Github className="h-3.5 w-3.5" />
+                    <span>GitHub</span>
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="llms-txt" aria-label="llms.txt" className="flex items-center gap-1">
+                    <FileText className="h-3.5 w-3.5" />
+                    <span>llms.txt</span>
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="sourceType"
+                render={({ field }) => (
+                  <FormItem hidden>
+                    <FormControl>
+                      <Input {...field} type="hidden" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
-          </div>
-          {errors.model && (
-            <p className="mt-1 text-sm text-red-600">{errors.model.message}</p>
-          )}
-        </div>
-        
-        <div>
-          <button 
-            type="submit" 
-            disabled={isPending}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-          >
-            <span>{isPending ? "Generating..." : "Generate Custom Course"}</span>
-            {isPending && (
-              <span className="ml-2">
-                <i className="fas fa-circle-notch fa-spin"></i>
-              </span>
-            )}
-          </button>
-        </div>
-        
-        <div className="text-xs text-gray-500 text-center">
-          <p>Powered by OpenRouter API | DeepSeek is free, other models have usage costs</p>
-        </div>
-      </form>
-    </div>
+            
+            <Tabs defaultValue={sourceType} value={sourceType} onValueChange={(value) => handleSourceTypeChange(value as SourceType)}>
+              <TabsContent value="github" className="mt-0 space-y-4">
+                <FormField
+                  control={form.control}
+                  name="sourceUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>GitHub Repository URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://github.com/username/repo" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter a GitHub repository URL to generate a course about it.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
+              
+              <TabsContent value="llms-txt" className="mt-0 space-y-4">
+                <FormField
+                  control={form.control}
+                  name="sourceUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Website or llms.txt URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://example.com or https://example.com/llms.txt" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter a website URL to fetch llms.txt or provide a direct link to an llms.txt file.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </TabsContent>
+            </Tabs>
+            
+            <FormField
+              control={form.control}
+              name="context"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Your Use Case / Context</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Describe your specific use case, technical requirements, or what you want to achieve with this tool."
+                      className="min-h-[120px]"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Provide context to make the generated course more specific to your needs.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="model"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Select OpenRouter LLM</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="deepseek/deepseek-chat-v3-0324:free" className="flex items-center gap-2">
+                          <Bot className="h-4 w-4 text-blue-500" />
+                          <span>DeepSeek Chat v3 (Free)</span>
+                        </SelectItem>
+                        <SelectItem value="anthropic/claude-3-opus">Claude 3 Opus</SelectItem>
+                        <SelectItem value="anthropic/claude-3-sonnet">Claude 3 Sonnet</SelectItem>
+                        <SelectItem value="google/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+                        <SelectItem value="google/gemini-pro">Gemini Pro</SelectItem>
+                        <SelectItem value="anthropic/claude-3-haiku">Claude 3 Haiku</SelectItem>
+                        <SelectItem value="openai/gpt-4o">GPT-4o</SelectItem>
+                        <SelectItem value="openai/gpt-4-turbo">GPT-4 Turbo</SelectItem>
+                        <SelectItem value="meta-llama/llama-3-70b-instruct">Llama 3 70B</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormDescription>
+                    DeepSeek is the free option. Other models may have usage costs through OpenRouter.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button 
+              type="submit" 
+              disabled={isPending}
+              className="w-full font-medium"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate Custom Course
+                </>
+              )}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+      
+      <CardFooter className="flex justify-center border-t pt-4">
+        <p className="text-xs text-muted-foreground flex items-center gap-1">
+          <Bot className="h-3 w-3" />
+          Powered by OpenRouter API
+        </p>
+      </CardFooter>
+    </Card>
   );
 }
