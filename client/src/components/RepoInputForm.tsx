@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { CourseContent, SourceType } from "@/types";
 
@@ -53,6 +53,9 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
         title: "Course generated successfully!",
         description: `Your custom course for ${data.repoUrl} has been created.`,
       });
+      
+      // Invalidate courses cache to refresh saved courses list
+      queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
     },
     onError: (error) => {
       toast({
