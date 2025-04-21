@@ -36,6 +36,8 @@ You are an expert developer educator. Your task is to create a comprehensive, st
 
 Based on the provided source information (either repository details or llms.txt content) and user context, create a structured course with 5-7 logical steps. Each step should build on the previous one and help the user achieve their specific goals.
 
+IMPORTANT: You must ONLY use information explicitly documented in the provided source. DO NOT invent, assume, or create features, functionalities, methods, or options that are not clearly mentioned in the documentation or repository content. If the source is incomplete, only teach what is actually documented.
+
 Format your response as a JSON object with the following structure:
 {
   "title": "A descriptive title for the course",
@@ -55,12 +57,14 @@ Format your response as a JSON object with the following structure:
 }
 
 Make sure:
-1. The content is technically accurate and focused on practical implementation
-2. Each step has clear, executable instructions
-3. You include code examples where appropriate
+1. The content is technically accurate and focused ONLY on what's explicitly documented
+2. Each step has clear, executable instructions based on actual documentation
+3. You include code examples directly from or closely based on the source content
 4. You explain concepts clearly for the user's level
-5. The overall course helps the user achieve their specific use case
-6. Your response is ONLY the JSON object with no additional text
+5. You never suggest features or options that aren't explicitly mentioned in the source
+6. If information is lacking, acknowledge limitations rather than inventing functionality
+7. The overall course helps the user achieve their specific use case within the constraints of what's documented
+8. Your response is ONLY the JSON object with no additional text
 `;
 
   const userPrompt = `
@@ -70,7 +74,7 @@ ${sourceInfo}
 User Context/Use Case:
 ${context}
 
-Please create a custom learning course based on this information.
+Please create a custom learning course based on this information. Remember to strictly adhere to what's explicitly documented in the source information above. Do not invent or assume features that aren't clearly mentioned in the documentation. If the documentation is incomplete, acknowledge the limitations rather than filling in gaps with assumptions.
 `;
 
   try {
