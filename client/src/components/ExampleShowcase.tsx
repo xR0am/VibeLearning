@@ -1,4 +1,12 @@
 import { Example } from "@/types";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Sparkles, Code, ExternalLink, Layers } from "lucide-react";
 
 export default function ExampleShowcase() {
   const examples: Example[] = [
@@ -25,43 +33,60 @@ export default function ExampleShowcase() {
   ];
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h3 className="text-xl font-bold text-gray-900 mb-4">Example Generated Courses</h3>
+    <Card className="border shadow-lg card-shadow mb-8">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          Example Generated Courses
+        </CardTitle>
+      </CardHeader>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {examples.map((example, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
-            <div className="p-4 border-b border-gray-200 bg-gray-50">
-              <h4 className="font-medium text-gray-900">{example.title}</h4>
-              <p className="text-sm text-gray-500 mt-1 truncate">{example.repoUrl}</p>
-            </div>
-            <div className="p-4">
-              <p className="text-sm text-gray-600 mb-3">Generated with {example.model}</p>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {example.tags.map((tag, tagIndex) => (
-                  <span key={tagIndex} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              {example.url ? (
-                <a 
-                  href={example.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline flex items-center mt-3"
-                >
-                  View example <i className="fas fa-external-link-alt ml-1 text-xs"></i>
-                </a>
-              ) : (
-                <button className="text-sm text-primary hover:underline flex items-center mt-3">
-                  View example <i className="fas fa-external-link-alt ml-1 text-xs"></i>
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {examples.map((example, index) => (
+            <Card key={index} className="border overflow-hidden">
+              <CardHeader className="p-4 pb-3 border-b">
+                <CardTitle className="text-base font-medium">{example.title}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1 truncate flex items-center gap-1">
+                  <Code className="h-3.5 w-3.5" />
+                  {example.repoUrl}
+                </p>
+              </CardHeader>
+              <CardContent className="p-4 pt-3">
+                <div className="flex items-center mb-3">
+                  <Badge variant="outline" className="bg-purple-50/30 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 text-xs">
+                    <Layers className="mr-1 h-3 w-3" />
+                    {example.model}
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {example.tags.map((tag, tagIndex) => (
+                    <Badge key={tagIndex} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                {example.url ? (
+                  <a 
+                    href={example.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline flex items-center mt-3"
+                  >
+                    <span>View example</span>
+                    <ExternalLink className="ml-1 h-3 w-3" />
+                  </a>
+                ) : (
+                  <button className="text-sm text-primary hover:underline flex items-center mt-3">
+                    <span>View example</span>
+                    <ExternalLink className="ml-1 h-3 w-3" />
+                  </button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
