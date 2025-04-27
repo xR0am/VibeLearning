@@ -242,7 +242,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         courses = await storage.getPublicCourses();
       }
       
-      res.json(courses);
+      // Add tags to each course
+      const coursesWithTags = await Promise.all(
+        courses.map(async (course) => {
+          const courseWithTags = await storage.getCourseWithTags(course.id);
+          return {
+            ...course,
+            tags: courseWithTags.tags
+          };
+        })
+      );
+      
+      res.json(coursesWithTags);
     } catch (error) {
       console.error("Error fetching courses:", error);
       res.status(500).json({

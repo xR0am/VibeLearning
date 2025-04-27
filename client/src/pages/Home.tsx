@@ -5,7 +5,7 @@ import IntroSection from "@/components/IntroSection";
 import RepoInputForm from "@/components/RepoInputForm";
 import CourseContent from "@/components/CourseContent";
 import SavedCourses from "@/components/SavedCourses";
-import PublicCourseLibrary from "@/components/ExampleShowcase";
+import PublicCourseLibrary from "@/components/PublicCourseLibrary";
 import HowItWorks from "@/components/HowItWorks";
 import Footer from "@/components/Footer";
 import { CourseContent as CourseContentType } from "@/types";
