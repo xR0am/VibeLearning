@@ -25,7 +25,7 @@ export function getAvailableFreeModels(): { id: string, name: string }[] {
     { id: "deepseek/deepseek-chat-v3-0324:free", name: "DeepSeek Chat v3" },
     { id: "deepseek/deepseek-r1:free", name: "DeepSeek R1" },
     { id: "meta-llama/llama-4-maverick:free", name: "Llama 4 Maverick" },
-    { id: "google/gemini-2.5-pro-exp-03-25:free", name: "Gemini 2.5 Pro" }
+    // Removed Gemini model as it's no longer available
   ];
 }
 
