@@ -64,10 +64,10 @@ export default function UserProfileSettings() {
         </div>
 
         {!hasApiKey && (
-          <Alert variant="warning" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>OpenRouter API Key Required</AlertTitle>
-            <AlertDescription>
+          <Alert className="mb-6 border-yellow-500 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20">
+            <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-500" />
+            <AlertTitle className="text-yellow-800 dark:text-yellow-400">OpenRouter API Key Required</AlertTitle>
+            <AlertDescription className="text-yellow-700 dark:text-yellow-300">
               You need to add your OpenRouter API key to generate courses. Get a free key at <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" className="underline">openrouter.ai</a>.
             </AlertDescription>
           </Alert>

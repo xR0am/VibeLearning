@@ -1,39 +1,37 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 export function useOpenRouterSettings() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  const { mutate: saveApiKey, isPending } = useMutation({
+  
+  const { mutate: saveApiKey, isPending: isSaving } = useMutation({
     mutationFn: async (apiKey: string) => {
-      return await apiRequest("/api/user/apikey", {
-        method: "POST",
-        body: JSON.stringify({ apiKey }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      return await apiRequest(
+        "POST",
+        "/api/user/openrouter-key", 
+        { apiKey }
+      );
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
-        title: "API Key Saved",
+        title: "API Key Updated",
         description: "Your OpenRouter API key has been saved successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to save API key: ${error.message}`,
+        title: "Error Saving API Key",
+        description: "There was a problem saving your API key. Please try again.",
         variant: "destructive",
       });
-    },
+      console.error("Error saving API key:", error);
+    }
   });
 
   return {
     saveApiKey,
-    isSaving: isPending,
+    isSaving
   };
 }

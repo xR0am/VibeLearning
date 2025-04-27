@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Home from "@/pages/Home";
+import Profile from "@/pages/Profile";
+import UserCourses from "@/pages/UserCourses";
+import PublicCourses from "@/pages/PublicCourses";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
 
@@ -12,6 +15,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/courses/user" component={UserCourses} />
+      <Route path="/courses/public" component={PublicCourses} />
       <Route component={NotFound} />
     </Switch>
   );
