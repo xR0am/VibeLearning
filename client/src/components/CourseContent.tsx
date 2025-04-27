@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   MenuIcon,
   BookOpen,
-  X
+  X,
+  ArrowLeft
 } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
@@ -20,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Link } from "wouter";
 
 interface CourseContentProps {
   content: CourseContentType;
@@ -32,7 +34,6 @@ export default function CourseContent({
   activeStepIndex, 
   setActiveStepIndex 
 }: CourseContentProps) {
-  const contentRef = useRef<HTMLDivElement>(null);
   const [progressValue, setProgressValue] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
@@ -101,32 +102,20 @@ export default function CourseContent({
   };
   
   return (
-    <div ref={contentRef} className="w-full mx-auto">
-      {/* Course Header */}
-      <Card className="border shadow-lg card-shadow mb-4">
-        <CardHeader className="pb-4">
-          <div className="flex justify-between items-start flex-wrap gap-4">
-            <div className="space-y-1">
-              <h2 className="text-3xl font-bold gradient-heading">{content.title}</h2>
-              <div className="flex items-center text-sm text-muted-foreground flex-wrap gap-2">
-                <div className="flex items-center">
-                  <Code className="mr-1 h-4 w-4" />
-                  <a 
-                    href={content.repoUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-primary hover:underline inline-flex items-center"
-                  >
-                    {content.repoUrl.replace(/^https?:\/\//i, '')}
-                    <ExternalLink className="ml-1 h-3 w-3" />
-                  </a>
-                </div>
-                <Badge variant="outline" className="flex items-center">
-                  <FileText className="mr-1 h-3 w-3" />
-                  {content.context}
-                </Badge>
-              </div>
-            </div>
+    <div className="course-viewer flex flex-col h-screen max-h-screen overflow-hidden">
+      {/* Fixed header */}
+      <div className="course-header flex flex-col border-b shadow-sm bg-background">
+        {/* Top navigation bar */}
+        <div className="flex items-center justify-between px-4 py-2 border-b">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+            <h1 className="text-xl font-semibold truncate max-w-[200px] sm:max-w-[400px] md:max-w-full">
+              {content.title}
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
               size="sm" 
@@ -134,139 +123,144 @@ export default function CourseContent({
               className="flex items-center gap-1"
             >
               <Download className="h-4 w-4" />
-              <span>Export</span>
+              <span className="hidden sm:inline">Export</span>
             </Button>
-          </div>
-          
-          <div className="mt-6 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="font-medium">Progress</span>
-              <span className="text-muted-foreground">
-                Step {activeStepIndex + 1} of {content.steps.length}
-              </span>
+            <div className="md:hidden">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="flex items-center justify-center"
+              >
+                {sidebarOpen ? <X className="h-4 w-4" /> : <MenuIcon className="h-4 w-4" />}
+              </Button>
             </div>
-            <Progress value={progressValue} className="h-2" />
           </div>
-        </CardHeader>
-      </Card>
-      
-      {/* Mobile menu button - only shown on small screens */}
-      <div className="md:hidden mb-4">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="w-full flex items-center justify-center gap-2"
-        >
-          {sidebarOpen ? <X className="h-4 w-4" /> : <MenuIcon className="h-4 w-4" />}
-          {sidebarOpen ? "Hide Course Outline" : "Show Course Outline"}
-        </Button>
+        </div>
+        
+        {/* Progress bar with course details */}
+        <div className="p-3 bg-muted/20">
+          <div className="flex justify-between items-center text-sm mb-1.5">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Progress</span>
+              <Badge variant="secondary" className="flex items-center text-xs">
+                <FileText className="mr-1 h-3 w-3" />
+                {content.context}
+              </Badge>
+            </div>
+            <span className="text-muted-foreground">
+              Step {activeStepIndex + 1} of {content.steps.length}
+            </span>
+          </div>
+          <Progress value={progressValue} className="h-2" />
+        </div>
       </div>
       
-      {/* Main layout - sidebar with steps and content area */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+      {/* Main content area with fixed height */}
+      <div className="course-body flex flex-1 overflow-hidden">
         {/* Sidebar / Course Outline */}
-        <div className={cn(
-          "md:col-span-3 transition-all duration-300 ease-in-out",
-          sidebarOpen ? "block" : "hidden md:block"
-        )}>
-          <Card className="border shadow-lg card-shadow sticky top-24">
-            <CardHeader className="py-3 px-4">
+        <div 
+          className={cn(
+            "course-sidebar border-r bg-muted/10",
+            "transition-all duration-300 ease-in-out",
+            "w-full md:w-72 lg:w-80 flex-shrink-0",
+            sidebarOpen 
+              ? "block absolute md:relative z-10 bg-background md:bg-transparent h-[calc(100vh-116px)] md:h-auto" 
+              : "hidden md:block"
+          )}
+        >
+          <div className="h-full flex flex-col">
+            <div className="p-3 border-b">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-primary" />
                 <h3 className="text-sm font-medium">Course Outline</h3>
               </div>
-            </CardHeader>
-            <Separator />
-            <CardContent className="p-0">
-              <ScrollArea className="h-[calc(100vh-280px)] md:h-[70vh] custom-scrollbar">
-                <div className="p-2">
-                  {content.steps.map((step, index) => (
-                    <div 
-                      key={step.id} 
-                      className={`flex items-start gap-2 p-2 rounded-md cursor-pointer mb-1 transition-all ${
-                        index === activeStepIndex 
-                          ? "bg-primary/10 text-primary" 
-                          : "hover:bg-muted"
-                      }`}
-                      onClick={() => handleStepChange(index)}
-                    >
-                      <div className={`flex items-center justify-center h-5 w-5 rounded-full text-xs font-medium mt-0.5 ${
-                        index < activeStepIndex 
-                          ? "bg-primary/20" 
-                          : index === activeStepIndex 
-                            ? "bg-primary/20 text-primary" 
-                            : "bg-muted text-muted-foreground"
-                      }`}>
-                        {index < activeStepIndex ? (
-                          <CheckCircle2 className="h-4 w-4 text-primary" />
-                        ) : (
-                          <span>{index + 1}</span>
-                        )}
-                      </div>
-                      <div>
-                        <div className={`text-sm font-medium ${
-                          index === activeStepIndex ? "text-primary" : ""
-                        }`}>
-                          {step.title}
-                        </div>
-                        {index === activeStepIndex && (
-                          <Badge variant="secondary" className="mt-1 text-xs">
-                            Current
-                          </Badge>
-                        )}
-                      </div>
+            </div>
+            <ScrollArea className="flex-1 custom-scrollbar">
+              <div className="p-2">
+                {content.steps.map((step, index) => (
+                  <div 
+                    key={step.id} 
+                    className={`flex items-start gap-2 p-2 rounded-md cursor-pointer mb-1 transition-all ${
+                      index === activeStepIndex 
+                        ? "bg-primary/10 text-primary" 
+                        : "hover:bg-muted"
+                    }`}
+                    onClick={() => handleStepChange(index)}
+                  >
+                    <div className={`flex items-center justify-center h-5 w-5 rounded-full text-xs font-medium mt-0.5 ${
+                      index < activeStepIndex 
+                        ? "bg-primary/20" 
+                        : index === activeStepIndex 
+                          ? "bg-primary/20 text-primary" 
+                          : "bg-muted text-muted-foreground"
+                    }`}>
+                      {index < activeStepIndex ? (
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      ) : (
+                        <span>{index + 1}</span>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+                    <div>
+                      <div className={`text-sm font-medium ${
+                        index === activeStepIndex ? "text-primary" : ""
+                      }`}>
+                        {step.title}
+                      </div>
+                      {index === activeStepIndex && (
+                        <Badge variant="secondary" className="mt-1 text-xs">
+                          Current
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
         </div>
         
-        {/* Main content area */}
-        <div className={cn(
-          "md:col-span-9",
-          sidebarOpen ? "block" : "block"
-        )}>
-          <Card className="border shadow-lg card-shadow">
-            <CardHeader className="pb-2 px-6">
-              <h3 className="text-2xl font-bold text-foreground">
-                {activeStep.title}
-              </h3>
-            </CardHeader>
-            <Separator />
-            <CardContent className="pt-4 px-6">
-              <ScrollArea className="custom-scrollbar h-[calc(100vh-280px)] md:h-[70vh]">
-                <div className="pr-4">
-                  <div className="prose dark:prose-invert max-w-none">
-                    <ReactMarkdown>
-                      {activeStep.content}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-              </ScrollArea>
-            </CardContent>
-            <CardFooter className="flex justify-between pt-2 pb-6 px-6 border-t mt-4">
-              <Button 
-                onClick={handlePrevious}
-                disabled={activeStepIndex === 0}
-                variant="outline"
-                className="flex items-center gap-1"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </Button>
-              <Button 
-                onClick={handleNext}
-                disabled={activeStepIndex === content.steps.length - 1}
-                className="flex items-center gap-1"
-              >
-                Next
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </CardFooter>
-          </Card>
+        {/* Main content area with fixed header and footer */}
+        <div className="course-content-wrapper flex-1 flex flex-col overflow-hidden">
+          {/* Content header */}
+          <div className="content-header border-b p-4">
+            <h2 className="text-xl font-bold text-foreground">
+              {activeStep.title}
+            </h2>
+          </div>
+          
+          {/* Scrollable content */}
+          <div className="content-body flex-1 overflow-auto p-6">
+            <div className="prose dark:prose-invert max-w-none">
+              <ReactMarkdown>
+                {activeStep.content}
+              </ReactMarkdown>
+            </div>
+          </div>
+          
+          {/* Fixed footer with navigation buttons */}
+          <div className="content-footer flex justify-between items-center p-4 border-t bg-background">
+            <Button 
+              onClick={handlePrevious}
+              disabled={activeStepIndex === 0}
+              variant="outline"
+              className="flex items-center gap-1"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <div className="hidden md:block text-sm text-muted-foreground">
+              {activeStepIndex + 1} of {content.steps.length}
+            </div>
+            <Button 
+              onClick={handleNext}
+              disabled={activeStepIndex === content.steps.length - 1}
+              className="flex items-center gap-1"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
