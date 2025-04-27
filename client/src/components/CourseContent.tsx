@@ -101,8 +101,19 @@ export default function CourseContent({
     document.body.removeChild(a);
   };
   
+  // Add effect to hide body scrollbar when component mounts
+  useEffect(() => {
+    // Disable body scrolling when component mounts
+    document.body.style.overflow = 'hidden';
+    
+    // Re-enable body scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   return (
-    <div className="course-viewer flex flex-col h-screen max-h-screen overflow-hidden">
+    <div className="course-viewer fixed inset-0 z-50 bg-background flex flex-col overflow-hidden">
       {/* Fixed header */}
       <div className="course-header flex flex-col border-b shadow-sm bg-background">
         {/* Top navigation bar */}

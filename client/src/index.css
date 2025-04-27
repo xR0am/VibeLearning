@@ -77,7 +77,6 @@
   /* Course viewer specific styles */
   .course-viewer {
     @apply bg-background;
-    height: calc(100vh - 4rem); /* Subtracting header height */
   }
   
   .course-header {
