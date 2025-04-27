@@ -9,6 +9,7 @@ import { CourseContent, SourceType } from "@/types";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useModels } from "@/hooks/useModels";
+import ApiKeyPrompt from "./ApiKeyPrompt";
 import { 
   Form, 
   FormControl, 
@@ -55,6 +56,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   const [sourceType, setSourceType] = useState<SourceType>("github");
   const { user, isAuthenticated } = useAuth();
   const { models, isLoading: isLoadingModels } = useModels();
+  const [isApiKeyPromptOpen, setIsApiKeyPromptOpen] = useState(false);
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -85,8 +87,18 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
         description: `Your custom course for ${data.repoUrl} has been created.`,
       });
       
-      // Invalidate courses cache to refresh saved courses list
+      // Invalidate appropriate courses cache depending on visibility
       queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
+      
+      if (isAuthenticated) {
+        // Also invalidate user-specific courses
+        queryClient.invalidateQueries({ queryKey: ["/api/courses/user"] });
+        
+        if (form.getValues("isPublic")) {
+          // Also invalidate public courses if this course is public
+          queryClient.invalidateQueries({ queryKey: ["/api/courses/public"] });
+        }
+      }
     },
     onError: (error) => {
       toast({
@@ -98,199 +110,246 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   });
   
   const onSubmit = (data: FormData) => {
+    // Check if user is authenticated but doesn't have an API key
+    if (isAuthenticated && !user?.openrouterApiKey) {
+      setIsApiKeyPromptOpen(true);
+      return;
+    }
+    
+    // Otherwise, proceed with the course generation
     mutate(data);
   };
   
   return (
-    <Card className="border shadow-lg card-shadow mb-8">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold gradient-heading flex items-center gap-2">
-          <Sparkles className="h-5 w-5" />
-          Generate Custom Course
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <span className="text-sm font-medium mr-2">Source Type:</span>
-                <ToggleGroup type="single" value={sourceType} onValueChange={(value) => value && handleSourceTypeChange(value as SourceType)}>
-                  <ToggleGroupItem value="github" aria-label="GitHub" className="flex items-center gap-1">
-                    <Github className="h-3.5 w-3.5" />
-                    <span>GitHub</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="llms-txt" aria-label="llms.txt" className="flex items-center gap-1">
-                    <FileText className="h-3.5 w-3.5" />
-                    <span>llms.txt</span>
-                  </ToggleGroupItem>
-                </ToggleGroup>
+    <>
+      <Card className="border shadow-lg card-shadow mb-8">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold gradient-heading flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            Generate Custom Course
+          </CardTitle>
+        </CardHeader>
+        
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <span className="text-sm font-medium mr-2">Source Type:</span>
+                  <ToggleGroup type="single" value={sourceType} onValueChange={(value) => value && handleSourceTypeChange(value as SourceType)}>
+                    <ToggleGroupItem value="github" aria-label="GitHub" className="flex items-center gap-1">
+                      <Github className="h-3.5 w-3.5" />
+                      <span>GitHub</span>
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="llms-txt" aria-label="llms.txt" className="flex items-center gap-1">
+                      <FileText className="h-3.5 w-3.5" />
+                      <span>llms.txt</span>
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="sourceType"
+                  render={({ field }) => (
+                    <FormItem hidden>
+                      <FormControl>
+                        <Input {...field} type="hidden" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
+              
+              <Tabs defaultValue={sourceType} value={sourceType} onValueChange={(value) => handleSourceTypeChange(value as SourceType)}>
+                <TabsContent value="github" className="mt-0 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="sourceUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>GitHub Repository URL</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="https://github.com/username/repo" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter a GitHub repository URL to generate a course about it.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="llms-txt" className="mt-0 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="sourceUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Website or llms.txt URL</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="https://example.com or https://example.com/llms.txt" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter a website URL to fetch llms.txt or provide a direct link to an llms.txt file.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
               
               <FormField
                 control={form.control}
-                name="sourceType"
+                name="context"
                 render={({ field }) => (
-                  <FormItem hidden>
+                  <FormItem>
+                    <FormLabel>Your Use Case / Context</FormLabel>
                     <FormControl>
-                      <Input {...field} type="hidden" />
+                      <Textarea 
+                        placeholder="Describe your specific use case, technical requirements, or what you want to achieve with this tool."
+                        className="min-h-[120px]"
+                        {...field} 
+                      />
                     </FormControl>
+                    <FormDescription>
+                      Provide context to make the generated course more specific to your needs.
+                    </FormDescription>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-            
-            <Tabs defaultValue={sourceType} value={sourceType} onValueChange={(value) => handleSourceTypeChange(value as SourceType)}>
-              <TabsContent value="github" className="mt-0 space-y-4">
-                <FormField
-                  control={form.control}
-                  name="sourceUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>GitHub Repository URL</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="https://github.com/username/repo" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Enter a GitHub repository URL to generate a course about it.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </TabsContent>
               
-              <TabsContent value="llms-txt" className="mt-0 space-y-4">
+              <FormField
+                control={form.control}
+                name="model"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select OpenRouter LLM</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a model"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {isLoadingModels ? (
+                            <div className="flex items-center justify-center py-2">
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              <span>Loading models...</span>
+                            </div>
+                          ) : models.length > 0 ? (
+                            models.map((model) => (
+                              <SelectItem 
+                                key={model.id} 
+                                value={model.id}
+                                className="flex items-center gap-2"
+                              >
+                                <Bot className="h-4 w-4 text-blue-500" />
+                                <span>{model.name}</span>
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="deepseek/deepseek-chat-v3-0324:free">
+                              DeepSeek Chat v3 (Free)
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormDescription>
+                      {!isAuthenticated ? (
+                        <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                          <Bot className="h-3.5 w-3.5" />
+                          Log in and add your OpenRouter API key to use more models
+                        </span>
+                      ) : !user?.openrouterApiKey ? (
+                        <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                          <Bot className="h-3.5 w-3.5" />
+                          Add your OpenRouter API key in profile settings to use more models
+                        </span>
+                      ) : (
+                        "Using available models from your OpenRouter account"
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {isAuthenticated && (
                 <FormField
                   control={form.control}
-                  name="sourceUrl"
+                  name="isPublic"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Website or llms.txt URL</FormLabel>
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Share publicly</FormLabel>
+                        <FormDescription>
+                          {field.value ? (
+                            <span className="flex items-center text-green-600 dark:text-green-400">
+                              <Globe className="h-3.5 w-3.5 mr-1" />
+                              Course will be visible to all users
+                            </span>
+                          ) : (
+                            <span className="flex items-center">
+                              <Lock className="h-3.5 w-3.5 mr-1" />
+                              Course will be private to your account
+                            </span>
+                          )}
+                        </FormDescription>
+                      </div>
                       <FormControl>
-                        <Input 
-                          placeholder="https://example.com or https://example.com/llms.txt" 
-                          {...field} 
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <FormDescription>
-                        Enter a website URL to fetch llms.txt or provide a direct link to an llms.txt file.
-                      </FormDescription>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
-              </TabsContent>
-            </Tabs>
-            
-            <FormField
-              control={form.control}
-              name="context"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Your Use Case / Context</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Describe your specific use case, technical requirements, or what you want to achieve with this tool."
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Provide context to make the generated course more specific to your needs.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
               )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="model"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select OpenRouter LLM</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a model"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {isLoadingModels ? (
-                          <div className="flex items-center justify-center py-2">
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            <span>Loading models...</span>
-                          </div>
-                        ) : models.length > 0 ? (
-                          models.map((model) => (
-                            <SelectItem 
-                              key={model.id} 
-                              value={model.id}
-                              className="flex items-center gap-2"
-                            >
-                              <Bot className="h-4 w-4 text-blue-500" />
-                              <span>{model.name}</span>
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="deepseek/deepseek-chat-v3-0324:free">
-                            DeepSeek Chat v3 (Free)
-                          </SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormDescription>
-                    {!isAuthenticated ? (
-                      <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                        <Bot className="h-3.5 w-3.5" />
-                        Log in and add your OpenRouter API key to use more models
-                      </span>
-                    ) : !user?.openrouterApiKey ? (
-                      <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                        <Bot className="h-3.5 w-3.5" />
-                        Add your OpenRouter API key in profile settings to use more models
-                      </span>
-                    ) : (
-                      "Using available models from your OpenRouter account"
-                    )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Button 
-              type="submit" 
-              disabled={isPending}
-              className="w-full font-medium"
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generate Custom Course
-                </>
-              )}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
+              
+              <Button 
+                type="submit" 
+                disabled={isPending}
+                className="w-full font-medium"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generate Custom Course
+                  </>
+                )}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+        
+        <CardFooter className="flex justify-center border-t pt-4">
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Bot className="h-3 w-3" />
+            Powered by OpenRouter API
+          </p>
+        </CardFooter>
+      </Card>
       
-      <CardFooter className="flex justify-center border-t pt-4">
-        <p className="text-xs text-muted-foreground flex items-center gap-1">
-          <Bot className="h-3 w-3" />
-          Powered by OpenRouter API
-        </p>
-      </CardFooter>
-    </Card>
+      <ApiKeyPrompt 
+        isOpen={isApiKeyPromptOpen} 
+        onClose={() => setIsApiKeyPromptOpen(false)}
+      />
+    </>
   );
 }

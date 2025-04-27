@@ -5,7 +5,7 @@ import { toast } from "@/hooks/use-toast";
 export function useOpenRouterSettings() {
   const queryClient = useQueryClient();
   
-  const { mutate: saveApiKey, isPending: isSaving } = useMutation({
+  const { mutate, isPending: isSaving } = useMutation({
     mutationFn: async (apiKey: string) => {
       return await apiRequest(
         "POST",
@@ -15,6 +15,7 @@ export function useOpenRouterSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/models"] });
       toast({
         title: "API Key Updated",
         description: "Your OpenRouter API key has been saved successfully.",
@@ -29,6 +30,18 @@ export function useOpenRouterSettings() {
       console.error("Error saving API key:", error);
     }
   });
+  
+  const saveApiKey = (apiKey: string, callbacks?: { onSuccess?: () => void; onError?: () => void }) => {
+    mutate(apiKey, {
+      onSuccess: () => {
+        callbacks?.onSuccess?.();
+      },
+      onError: (error) => {
+        console.error("Error saving API key:", error);
+        callbacks?.onError?.();
+      }
+    });
+  };
 
   return {
     saveApiKey,
