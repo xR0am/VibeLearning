@@ -25,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Update user's OpenRouter API key
-  app.post("/api/user/apikey", isAuthenticated, async (req: any, res) => {
+  app.post("/api/user/openrouter-key", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { apiKey } = req.body;
