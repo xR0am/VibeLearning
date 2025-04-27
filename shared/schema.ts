@@ -134,4 +134,8 @@ export const courseWithTagsSchema = z.object({
   tags: z.array(z.string()),
 });
 
-export type CourseWithTags = z.infer<typeof courseWithTagsSchema>;
+export type CourseWithTags = typeof courses.$inferSelect & {
+  tags?: string[];
+  isPublic: boolean;
+  modelUsed: string;
+};

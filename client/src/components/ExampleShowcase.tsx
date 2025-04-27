@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CourseWithTags } from "@/types";
+import { CourseWithTags } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -30,22 +30,22 @@ export default function PublicCourseLibrary() {
   const [uniqueTags, setUniqueTags] = useState<string[]>([]);
   
   // Fetch public courses
-  const { data: courses, isLoading, error } = useQuery({
+  const { data: courses = [], isLoading, error } = useQuery<CourseWithTags[]>({
     queryKey: ["/api/courses"],
     retry: 1,
   });
   
   // Extract unique tags from all courses
   useEffect(() => {
-    if (courses && courses.length > 0) {
-      const allTags = courses.flatMap(course => course.tags || []);
-      const uniqueTagSet = new Set(allTags);
+    if (courses.length > 0) {
+      const allTags = courses.flatMap((course: CourseWithTags) => course.tags || []);
+      const uniqueTagSet = new Set<string>(allTags as string[]);
       setUniqueTags(Array.from(uniqueTagSet));
     }
   }, [courses]);
   
   // Filter courses based on search query and selected tag
-  const filteredCourses = courses?.filter((course: CourseWithTags) => {
+  const filteredCourses = courses.filter((course: CourseWithTags) => {
     // Filter by search query
     const matchesSearch = 
       !searchQuery || 

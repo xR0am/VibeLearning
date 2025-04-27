@@ -5,7 +5,7 @@ import IntroSection from "@/components/IntroSection";
 import RepoInputForm from "@/components/RepoInputForm";
 import CourseContent from "@/components/CourseContent";
 import SavedCourses from "@/components/SavedCourses";
-import ExampleShowcase from "@/components/ExampleShowcase";
+import PublicCourseLibrary from "@/components/ExampleShowcase";
 import HowItWorks from "@/components/HowItWorks";
 import Footer from "@/components/Footer";
 import { CourseContent as CourseContentType } from "@/types";
@@ -84,7 +84,7 @@ export default function Home() {
               </div>
             </div>
             
-            <ExampleShowcase />
+            <PublicCourseLibrary />
             <HowItWorks />
           </motion.main>
         ) : (
