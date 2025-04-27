@@ -6,6 +6,9 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CourseContent, SourceType } from "@/types";
+import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/hooks/useAuth";
+import { useModels } from "@/hooks/useModels";
 import { 
   Form, 
   FormControl, 
@@ -27,7 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Github, FileText, Loader2, Sparkles, Bot } from "lucide-react";
+import { Github, FileText, Loader2, Sparkles, Bot, Globe, Lock } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const formSchema = z.object({
@@ -37,6 +40,7 @@ const formSchema = z.object({
   }),
   context: z.string().min(1, { message: "Context is required" }),
   model: z.string().min(1, { message: "Model selection is required" }),
+  isPublic: z.boolean().default(false),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -49,6 +53,8 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [sourceType, setSourceType] = useState<SourceType>("github");
+  const { user, isAuthenticated } = useAuth();
+  const { models, isLoading: isLoadingModels } = useModels();
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -57,6 +63,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
       sourceType: "github",
       context: "",
       model: "deepseek/deepseek-chat-v3-0324:free",
+      isPublic: false,
     },
   });
   
@@ -210,26 +217,47 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
                   <FormControl>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a model" />
+                        <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a model"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="deepseek/deepseek-chat-v3-0324:free" className="flex items-center gap-2">
-                          <Bot className="h-4 w-4 text-blue-500" />
-                          <span>DeepSeek Chat v3 (Free)</span>
-                        </SelectItem>
-                        <SelectItem value="anthropic/claude-3-opus">Claude 3 Opus</SelectItem>
-                        <SelectItem value="anthropic/claude-3-sonnet">Claude 3 Sonnet</SelectItem>
-                        <SelectItem value="google/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-                        <SelectItem value="google/gemini-pro">Gemini Pro</SelectItem>
-                        <SelectItem value="anthropic/claude-3-haiku">Claude 3 Haiku</SelectItem>
-                        <SelectItem value="openai/gpt-4o">GPT-4o</SelectItem>
-                        <SelectItem value="openai/gpt-4-turbo">GPT-4 Turbo</SelectItem>
-                        <SelectItem value="meta-llama/llama-3-70b-instruct">Llama 3 70B</SelectItem>
+                        {isLoadingModels ? (
+                          <div className="flex items-center justify-center py-2">
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            <span>Loading models...</span>
+                          </div>
+                        ) : models.length > 0 ? (
+                          models.map((model) => (
+                            <SelectItem 
+                              key={model.id} 
+                              value={model.id}
+                              className="flex items-center gap-2"
+                            >
+                              <Bot className="h-4 w-4 text-blue-500" />
+                              <span>{model.name}</span>
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="deepseek/deepseek-chat-v3-0324:free">
+                            DeepSeek Chat v3 (Free)
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </FormControl>
                   <FormDescription>
-                    DeepSeek is the free option. Other models may have usage costs through OpenRouter.
+                    {!isAuthenticated ? (
+                      <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                        <Bot className="h-3.5 w-3.5" />
+                        Log in and add your OpenRouter API key to use more models
+                      </span>
+                    ) : !user?.openrouterApiKey ? (
+                      <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                        <Bot className="h-3.5 w-3.5" />
+                        Add your OpenRouter API key in profile settings to use more models
+                      </span>
+                    ) : (
+                      "Using available models from your OpenRouter account"
+                    )}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
