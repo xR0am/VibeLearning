@@ -20,15 +20,26 @@ interface OpenRouterResponse {
   }[];
 }
 
+export function getAvailableFreeModels(): { id: string, name: string }[] {
+  return [
+    { id: "deepseek/deepseek-chat-v3-0324:free", name: "DeepSeek Chat v3" },
+    { id: "deepseek/deepseek-r1:free", name: "DeepSeek R1" },
+    { id: "meta-llama/llama-4-maverick:free", name: "Llama 4 Maverick" },
+    { id: "google/gemini-2.5-pro-exp-03-25:free", name: "Gemini 2.5 Pro" }
+  ];
+}
+
 export async function generateCourseWithOpenRouter(
   sourceInfo: string,
   context: string,
-  model: string
+  model: string,
+  apiKey?: string
 ): Promise<string> {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  // If no API key is provided, check for environment variable
+  const effectiveApiKey = apiKey || process.env.OPENROUTER_API_KEY;
   
-  if (!apiKey) {
-    throw new Error("OpenRouter API key is not configured");
+  if (!effectiveApiKey) {
+    throw new Error("OpenRouter API key is required. Please add your API key in account settings.");
   }
   
   const systemPrompt = `
@@ -89,7 +100,7 @@ Please create a custom learning course based on this information. Remember to st
       },
       {
         headers: {
-          Authorization: `Bearer ${apiKey}`,
+          Authorization: `Bearer ${effectiveApiKey}`,
           "Content-Type": "application/json"
         }
       }
