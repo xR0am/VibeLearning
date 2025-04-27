@@ -219,10 +219,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // API route to get all courses (admin or backward compatibility)
-  app.get("/api/courses", async (req, res) => {
+  // API route to get all courses 
+  // For authenticated users: returns personal and public courses
+  // For unauthenticated users: returns only public courses
+  app.get("/api/courses", async (req: any, res) => {
     try {
-      const courses = await storage.getAllCourses();
+      let courses;
+      
+      if (req.isAuthenticated()) {
+        // Get all the user's personal courses plus public courses
+        const userId = req.user.claims.sub;
+        const userCourses = await storage.getUserCourses(userId);
+        const publicCourses = await storage.getPublicCourses();
+        
+        // Filter public courses to remove duplicates already in user courses
+        const userCourseIds = new Set(userCourses.map(course => course.id));
+        const filteredPublicCourses = publicCourses.filter(course => !userCourseIds.has(course.id));
+        
+        courses = [...userCourses, ...filteredPublicCourses];
+      } else {
+        // For unauthenticated users, return only public courses
+        courses = await storage.getPublicCourses();
+      }
+      
       res.json(courses);
     } catch (error) {
       console.error("Error fetching courses:", error);
