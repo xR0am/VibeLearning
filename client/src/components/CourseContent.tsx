@@ -37,6 +37,16 @@ export default function CourseContent({
   const [progressValue, setProgressValue] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
+  // Reference to the scrollable content area
+  const contentBodyRef = useRef<HTMLDivElement>(null);
+  
+  // Function to scroll content to top
+  const scrollToTop = () => {
+    if (contentBodyRef.current) {
+      contentBodyRef.current.scrollTop = 0;
+    }
+  };
+
   useEffect(() => {
     // Animate progress bar
     const progress = ((activeStepIndex + 1) / content.steps.length) * 100;
@@ -58,8 +68,15 @@ export default function CourseContent({
     return () => clearInterval(interval);
   }, [activeStepIndex, content.steps.length, progressValue]);
   
+  // Reset scroll position when active step changes
+  useEffect(() => {
+    scrollToTop();
+  }, [activeStepIndex]);
+  
   const handleStepChange = (index: number) => {
     setActiveStepIndex(index);
+    // Scroll content area to top
+    scrollToTop();
     // On mobile, close the sidebar after selection
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
@@ -71,12 +88,16 @@ export default function CourseContent({
   const handlePrevious = () => {
     if (activeStepIndex > 0) {
       setActiveStepIndex(activeStepIndex - 1);
+      // Scroll to top when changing steps
+      scrollToTop();
     }
   };
   
   const handleNext = () => {
     if (activeStepIndex < content.steps.length - 1) {
       setActiveStepIndex(activeStepIndex + 1);
+      // Scroll to top when changing steps
+      scrollToTop();
     }
   };
   
@@ -241,7 +262,7 @@ export default function CourseContent({
           </div>
           
           {/* Scrollable content */}
-          <div className="content-body flex-1 overflow-auto p-6">
+          <div ref={contentBodyRef} className="content-body flex-1 overflow-auto p-6">
             <div className="prose dark:prose-invert max-w-none">
               <ReactMarkdown>
                 {activeStep.content}
