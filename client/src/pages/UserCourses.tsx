@@ -63,7 +63,7 @@ export default function UserCourses() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course: any) => (
+              {courses.map((course: CourseWithTags) => (
                 <Card key={course.id} className="flex flex-col h-full transition-all hover:shadow-md">
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">

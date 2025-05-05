@@ -8,18 +8,19 @@ import { FileText, User, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CourseContent } from "@/types";
+import { CourseWithTags } from "@shared/schema";
 
 export default function PublicCourses() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<CourseContent | null>(null);
 
-  const { data: courses = [], isLoading } = useQuery({
+  const { data: courses = [], isLoading } = useQuery<CourseWithTags[]>({
     queryKey: ["/api/courses/public"],
   });
 
   // Filter courses based on search term
   const filteredCourses = searchTerm 
-    ? courses.filter((course: any) => 
+    ? courses.filter((course: CourseWithTags) => 
         course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         course.context.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (course.tags && course.tags.some((tag: string) => 
@@ -78,7 +79,7 @@ export default function PublicCourses() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCourses.map((course: any) => (
+              {filteredCourses.map((course: CourseWithTags) => (
                 <Card key={course.id} className="flex flex-col h-full transition-all hover:shadow-md">
                   <CardHeader className="pb-3">
                     <CardTitle className="line-clamp-1">{course.title}</CardTitle>
