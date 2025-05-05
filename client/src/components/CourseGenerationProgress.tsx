@@ -84,7 +84,9 @@ export default function CourseGenerationProgress({ sourceType }: CourseGeneratio
     };
   }, [currentStage, stages]);
 
-  const CurrentIcon = stages[currentStage].icon;
+  // Safeguard against out-of-bounds currentStage index
+  const stage = stages[currentStage < stages.length ? currentStage : 0] || stages[0];
+  const CurrentIcon = stage?.icon || FileText; // Default to FileText if icon not available
   
   return (
     <div className="w-full max-w-md mx-auto px-4 py-8 text-center">
@@ -98,8 +100,8 @@ export default function CourseGenerationProgress({ sourceType }: CourseGeneratio
           <CurrentIcon className="h-12 w-12 text-primary animate-pulse" />
         </motion.div>
         
-        <h2 className="text-2xl font-bold mb-2">{stages[currentStage].title}</h2>
-        <p className="text-muted-foreground mb-4">{stages[currentStage].description}</p>
+        <h2 className="text-2xl font-bold mb-2">{stage.title}</h2>
+        <p className="text-muted-foreground mb-4">{stage.description}</p>
       </div>
       
       <div className="space-y-5 mb-6 w-full">

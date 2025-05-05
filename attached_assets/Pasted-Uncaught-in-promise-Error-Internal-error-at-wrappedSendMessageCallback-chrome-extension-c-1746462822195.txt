@@ -1,0 +1,48 @@
+Uncaught (in promise) Error: Internal error.
+    at wrappedSendMessageCallback (chrome-extension://cfhdojbkjhnklbpkdaibdccddilifddb/vendor/@eyeo/webext-ad-filtering-solution/content.js:2416:16)Understand this error
+chrome-extension://c…ddb/polyfill.js:500 Uncaught (in promise) Error: Internal error.
+    at wrappedSendMessageCallback (chrome-extension://cfhdojbkjhnklbpkdaibdccddilifddb/polyfill.js:500:16)Understand this error
+2CourseGenerationProgress.tsx:87 Uncaught TypeError: Cannot read properties of undefined (reading 'icon')
+    at CourseGenerationProgress (CourseGenerationProgress.tsx:87:44)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=ad490e94:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js?v=ad490e94:14582:28)
+    at beginWork (chunk-RPCDYKBN.js?v=ad490e94:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js?v=ad490e94:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js?v=ad490e94:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js?v=ad490e94:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=ad490e94:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=ad490e94:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js?v=ad490e94:19137:13)Understand this error
+hook.js:608 The above error occurred in the <CourseGenerationProgress> component:
+
+    at CourseGenerationProgress (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/src/components/CourseGenerationProgress.tsx:22:52)
+    at div
+    at MotionComponent (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=ad490e94:6536:40)
+    at PresenceChild (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=ad490e94:7742:24)
+    at AnimatePresence (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=ad490e94:7800:26)
+    at div
+    at Home (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/src/pages/Home.tsx:32:45)
+    at Route (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ad490e94:323:16)
+    at Switch (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ad490e94:379:17)
+    at Router
+    at div
+    at Provider (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=ad490e94:38:15)
+    at TooltipProvider (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=ad490e94:65:5)
+    at QueryClientProvider (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=ad490e94:2805:3)
+    at ThemeProvider (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/src/components/ThemeProvider.tsx:25:3)
+    at App (https://59fb44a8-3176-405f-a51d-270cbdc08cfb-00-37t2i5imz6zhy.worf.replit.dev/src/App.tsx?t=1746462683609&v=NT99UV_1qeS3QTX0Nt7T4:72:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+overrideMethod @ hook.js:608Understand this error
+chunk-RPCDYKBN.js?v=ad490e94:19413 Uncaught TypeError: Cannot read properties of undefined (reading 'icon')
+    at CourseGenerationProgress (CourseGenerationProgress.tsx:87:44)
+    at renderWithHooks (chunk-RPCDYKBN.js?v=ad490e94:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js?v=ad490e94:14582:28)
+    at beginWork (chunk-RPCDYKBN.js?v=ad490e94:15924:22)
+    at beginWork$1 (chunk-RPCDYKBN.js?v=ad490e94:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js?v=ad490e94:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js?v=ad490e94:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js?v=ad490e94:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js?v=ad490e94:18736:28)
+    at performConcurrentWorkOnRoot (chunk-RPCDYKBN.js?v=ad490e94:18684:30)Understand this error

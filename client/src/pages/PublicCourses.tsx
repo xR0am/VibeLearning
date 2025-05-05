@@ -99,7 +99,7 @@ export default function PublicCourses() {
                         <span className="font-semibold mr-2">Author:</span>
                         <div className="flex items-center">
                           <User className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                          <span>{course.username || "Anonymous"}</span>
+                          <span>{(course as any).username || "Anonymous"}</span>
                         </div>
                       </div>
                     </div>
@@ -123,12 +123,14 @@ export default function PublicCourses() {
                         let parsedSteps;
                         try {
                           // Try standard JSON parsing first
-                          parsedSteps = JSON.parse(course.content);
+                          const content = course.content as string;
+                          parsedSteps = JSON.parse(content);
                         } catch (error) {
                           console.log("Initial JSON parse failed, attempting to extract valid JSON...");
                           try {
                             // If it fails, try to extract valid JSON using regex
-                            const jsonMatch = course.content.match(/(\{[\s\S]*\})/);
+                            const content = course.content as string;
+                            const jsonMatch = content.match(/(\{[\s\S]*\})/);
                             if (jsonMatch && jsonMatch[0]) {
                               parsedSteps = JSON.parse(jsonMatch[0]);
                               console.log("Successfully extracted JSON from response");

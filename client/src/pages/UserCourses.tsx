@@ -113,12 +113,14 @@ export default function UserCourses() {
                         let parsedSteps;
                         try {
                           // Try standard JSON parsing first
-                          parsedSteps = JSON.parse(course.content);
+                          const content = course.content as string;
+                          parsedSteps = JSON.parse(content);
                         } catch (error) {
                           console.log("Initial JSON parse failed, attempting to extract valid JSON...");
                           try {
                             // If it fails, try to extract valid JSON using regex
-                            const jsonMatch = course.content.match(/(\{[\s\S]*\})/);
+                            const content = course.content as string;
+                            const jsonMatch = content.match(/(\{[\s\S]*\})/);
                             if (jsonMatch && jsonMatch[0]) {
                               parsedSteps = JSON.parse(jsonMatch[0]);
                               console.log("Successfully extracted JSON from response");
