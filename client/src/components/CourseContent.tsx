@@ -1,6 +1,21 @@
 import { useRef, useEffect, useState } from "react";
 import { CourseContent as CourseContentType } from "@/types";
 import ReactMarkdown from 'react-markdown';
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
+import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
+import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
+
+// Register languages
+SyntaxHighlighter.registerLanguage('typescript', typescript);
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('bash', bash);
+SyntaxHighlighter.registerLanguage('json', json);
+SyntaxHighlighter.registerLanguage('python', python);
+import { useTheme } from "@/components/ThemeProvider";
 import { 
   Download, 
   ChevronLeft, 
@@ -278,7 +293,43 @@ export default function CourseContent({
           {/* Scrollable content */}
           <div ref={contentBodyRef} className="content-body flex-1 overflow-auto p-6">
             <div className="prose dark:prose-invert max-w-none">
-              <ReactMarkdown>
+              <ReactMarkdown
+                components={{
+                  code({ className, children, ...props }) {
+                    // Check if this is a code block with a language specified
+                    const match = /language-(\w+)/.exec(className || '');
+                    const { theme } = useTheme();
+                    
+                    // Only apply syntax highlighting to code blocks with language
+                    if (match && children) {
+                      // Get the language from the className
+                      const language = match[1];
+                      
+                      // Use appropriate theme based on light/dark mode
+                      const highlighterStyle = theme === 'dark' ? vscDarkPlus : vs;
+                      
+                      return (
+                        <div className="rounded-md overflow-hidden my-4">
+                          <SyntaxHighlighter
+                            language={language}
+                            style={highlighterStyle as any}
+                            customStyle={{ margin: 0, borderRadius: '4px' }}
+                          >
+                            {String(children).replace(/\n$/, '')}
+                          </SyntaxHighlighter>
+                        </div>
+                      );
+                    }
+                    
+                    // For inline code or code without language, use default rendering
+                    return (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  }
+                }}
+              >
                 {activeStep.content}
               </ReactMarkdown>
             </div>
