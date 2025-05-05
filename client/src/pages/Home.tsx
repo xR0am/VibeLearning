@@ -4,18 +4,19 @@ import Header from "@/components/Header";
 import IntroSection from "@/components/IntroSection";
 import RepoInputForm from "@/components/RepoInputForm";
 import CourseContent from "@/components/CourseContent";
-import SavedCourses from "@/components/SavedCourses";
 import PublicCourseLibrary from "@/components/PublicCourseLibrary";
+import CourseGenerationProgress from "@/components/CourseGenerationProgress";
 import HowItWorks from "@/components/HowItWorks";
 import Footer from "@/components/Footer";
-import { CourseContent as CourseContentType } from "@/types";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { CourseContent as CourseContentType, SourceType } from "@/types";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const [courseContent, setCourseContent] = useState<CourseContentType | null>(null);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentSourceType, setCurrentSourceType] = useState<SourceType>("github");
   const [view, setView] = useState<'home' | 'course'>('home');
   
   // Reset active step when course content changes
@@ -26,8 +27,9 @@ export default function Home() {
     }
   }, [courseContent]);
 
-  const handleCourseSelect = (course: CourseContentType) => {
+  const handleCourseSelect = (course: CourseContentType, sourceType: SourceType) => {
     setIsLoading(true);
+    setCurrentSourceType(sourceType);
     
     // Simulate loading to provide better UX
     setTimeout(() => {
@@ -39,7 +41,7 @@ export default function Home() {
         top: 0,
         behavior: 'smooth'
       });
-    }, 800);
+    }, 13000); // Longer time to allow progress animation to play
   };
   
   const handleBackToHome = () => {
@@ -67,11 +69,7 @@ export default function Home() {
             exit={{ opacity: 0 }}
             className="flex-grow flex items-center justify-center py-20"
           >
-            <div className="text-center">
-              <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-              <h3 className="text-xl font-semibold mb-2">Preparing your course</h3>
-              <p className="text-muted-foreground">Loading content, please wait...</p>
-            </div>
+            <CourseGenerationProgress sourceType={currentSourceType} />
           </motion.div>
         ) : view === 'home' ? (
           <motion.main 

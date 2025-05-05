@@ -7,6 +7,12 @@ import { fetchRepositoryInfo } from "./github";
 import { fetchLlmsTxtContent } from "./llms-txt";
 import { generateCourseWithOpenRouter, getAvailableFreeModels } from "./openrouter";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { 
+  getAllSystemPrompts, 
+  getSystemPrompt, 
+  updateSystemPrompt, 
+  resetSystemPrompt 
+} from "./admin";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Replit Auth
@@ -294,6 +300,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching course:", error);
       res.status(500).json({
         message: "Failed to fetch course",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Admin routes
+  const ADMIN_USER_ID = "38352714"; // xr0am's ID
+  
+  // Check if user is admin middleware
+  const isAdmin = async (req: any, res: any, next: any) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    const userId = req.user.claims.sub;
+    if (userId !== ADMIN_USER_ID) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+    
+    next();
+  };
+  
+  // Get all system prompts
+  app.get("/api/admin/prompts", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const prompts = getAllSystemPrompts();
+      res.json(prompts);
+    } catch (error) {
+      console.error("Error fetching system prompts:", error);
+      res.status(500).json({
+        message: "Failed to fetch system prompts",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  // Update system prompt
+  app.post("/api/admin/prompts", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { type, prompt } = req.body;
+      
+      if (!type || !prompt) {
+        return res.status(400).json({ message: "Type and prompt are required" });
+      }
+      
+      if (type !== "github" && type !== "llmsTxt") {
+        return res.status(400).json({ message: "Invalid prompt type" });
+      }
+      
+      updateSystemPrompt(type, prompt);
+      res.json({ success: true, type, prompt });
+    } catch (error) {
+      console.error("Error updating system prompt:", error);
+      res.status(500).json({
+        message: "Failed to update system prompt",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+  
+  // Reset system prompt to default
+  app.post("/api/admin/prompts/reset", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { type } = req.body;
+      
+      if (!type) {
+        return res.status(400).json({ message: "Type is required" });
+      }
+      
+      if (type !== "github" && type !== "llmsTxt") {
+        return res.status(400).json({ message: "Invalid prompt type" });
+      }
+      
+      const prompt = resetSystemPrompt(type);
+      res.json({ success: true, type, prompt });
+    } catch (error) {
+      console.error("Error resetting system prompt:", error);
+      res.status(500).json({
+        message: "Failed to reset system prompt",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
