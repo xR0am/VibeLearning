@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Profile from "@/pages/Profile";
 import UserCourses from "@/pages/UserCourses";
 import PublicCourses from "@/pages/PublicCourses";
+import Course from "@/pages/Course";
 import Admin from "@/pages/Admin";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/courses/user" component={UserCourses} />
       <Route path="/courses/public" component={PublicCourses} />
       <Route path="/admin" component={Admin} />
+      <Route path="/course/:id" component={Course} />
       <Route component={NotFound} />
     </Switch>
   );
