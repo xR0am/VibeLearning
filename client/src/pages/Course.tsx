@@ -24,37 +24,67 @@ export default function Course() {
   useEffect(() => {
     if (course) {
       try {
-        // Parse course content and set it
-        let parsedSteps;
-        try {
-          // Try standard JSON parsing first
-          const content = course.content as string;
-          parsedSteps = JSON.parse(content);
-        } catch (error) {
-          console.log("Initial JSON parse failed, attempting to extract valid JSON...");
+        // Handle course content parsing, accounting for different possible structures
+        let parsedSteps = [];
+        
+        // Check if content is already an object with steps property
+        if (typeof course.content === 'object' && course.content !== null && Array.isArray(course.content.steps)) {
+          // Content is already an object with the steps array
+          parsedSteps = course.content.steps;
+        } else {
+          // Try to parse content as JSON if it's a string
           try {
-            // If it fails, try to extract valid JSON using regex
-            const content = course.content as string;
-            const jsonMatch = content.match(/(\{[\s\S]*\})/);
-            if (jsonMatch && jsonMatch[0]) {
-              parsedSteps = JSON.parse(jsonMatch[0]);
-              console.log("Successfully extracted JSON from response");
-            } else {
-              console.error("Failed to extract valid JSON", error);
-              // Default to empty array if all parsing attempts fail
+            const content = typeof course.content === 'string' 
+              ? course.content 
+              : JSON.stringify(course.content);
+              
+            const parsed = JSON.parse(content);
+            
+            // Check if the parsed result has a steps array
+            if (Array.isArray(parsed.steps)) {
+              parsedSteps = parsed.steps;
+            } else if (Array.isArray(parsed)) {
+              // If parsed result is an array, use it directly
+              parsedSteps = parsed;
+            }
+          } catch (error) {
+            console.log("Initial JSON parse failed, attempting to extract valid JSON...");
+            try {
+              // If it fails, try to extract valid JSON using regex
+              const content = typeof course.content === 'string'
+                ? course.content
+                : JSON.stringify(course.content);
+                
+              const jsonMatch = content.match(/(\{[\s\S]*\})/);
+              if (jsonMatch && jsonMatch[0]) {
+                const extracted = JSON.parse(jsonMatch[0]);
+                parsedSteps = Array.isArray(extracted.steps) ? extracted.steps : [];
+                console.log("Successfully extracted JSON from response");
+              } else {
+                console.error("Failed to extract valid JSON");
+                parsedSteps = [];
+              }
+            } catch (secondError) {
+              console.error("Failed to extract valid JSON", secondError);
               parsedSteps = [];
             }
-          } catch (secondError) {
-            console.error("Failed to extract valid JSON", secondError);
-            parsedSteps = [];
           }
         }
         
+        // Ensure we have valid steps with required properties
+        const validatedSteps = Array.isArray(parsedSteps) ? parsedSteps.filter(step => 
+          step && typeof step === 'object' && 
+          'id' in step && 
+          'title' in step && 
+          'content' in step
+        ) : [];
+        
+        // Create properly formatted course content
         const content: CourseContentType = {
           title: course.title,
-          repoUrl: course.repoUrl,
-          context: course.context,
-          steps: parsedSteps
+          repoUrl: course.repoUrl || '',
+          context: course.context || '',
+          steps: validatedSteps.length > 0 ? validatedSteps : []
         };
         
         setCourseContent(content);

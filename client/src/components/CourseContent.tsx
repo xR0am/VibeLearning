@@ -83,7 +83,10 @@ export default function CourseContent({
     }
   };
   
-  const activeStep = content.steps[activeStepIndex];
+  // Make sure there are steps and the activeStepIndex is valid
+  const activeStep = content.steps && content.steps.length > 0 
+    ? content.steps[Math.min(activeStepIndex, content.steps.length - 1)] 
+    : { id: 0, title: 'No content available', content: 'This course has no content.' };
   
   const handlePrevious = () => {
     if (activeStepIndex > 0) {
@@ -104,12 +107,17 @@ export default function CourseContent({
   // Function to export course as markdown
   const exportAsMD = () => {
     let markdown = `# ${content.title}\n\n`;
-    markdown += `Repository: ${content.repoUrl}\n\n`;
-    markdown += `Context: ${content.context}\n\n`;
+    markdown += `Repository: ${content.repoUrl || 'No repository'}\n\n`;
+    markdown += `Context: ${content.context || 'No context'}\n\n`;
     
-    content.steps.forEach((step) => {
-      markdown += `## ${step.title}\n\n${step.content}\n\n`;
-    });
+    // Make sure steps is an array before iterating
+    if (Array.isArray(content.steps)) {
+      content.steps.forEach((step) => {
+        if (step && typeof step === 'object' && 'title' in step && 'content' in step) {
+          markdown += `## ${step.title}\n\n${step.content}\n\n`;
+        }
+      });
+    }
     
     const blob = new Blob([markdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
@@ -210,43 +218,49 @@ export default function CourseContent({
             </div>
             <ScrollArea className="flex-1 custom-scrollbar">
               <div className="p-2">
-                {content.steps.map((step, index) => (
-                  <div 
-                    key={step.id} 
-                    className={`flex items-start gap-2 p-2 rounded-md cursor-pointer mb-1 transition-all ${
-                      index === activeStepIndex 
-                        ? "bg-primary/10 text-primary" 
-                        : "hover:bg-muted"
-                    }`}
-                    onClick={() => handleStepChange(index)}
-                  >
-                    <div className={`flex items-center justify-center h-5 w-5 rounded-full text-xs font-medium mt-0.5 ${
-                      index < activeStepIndex 
-                        ? "bg-primary/20" 
-                        : index === activeStepIndex 
-                          ? "bg-primary/20 text-primary" 
-                          : "bg-muted text-muted-foreground"
-                    }`}>
-                      {index < activeStepIndex ? (
-                        <CheckCircle2 className="h-4 w-4 text-primary" />
-                      ) : (
-                        <span>{index + 1}</span>
-                      )}
-                    </div>
-                    <div>
-                      <div className={`text-sm font-medium ${
-                        index === activeStepIndex ? "text-primary" : ""
+                {Array.isArray(content.steps) && content.steps.length > 0 ? (
+                  content.steps.map((step, index) => (
+                    <div 
+                      key={step.id || index} 
+                      className={`flex items-start gap-2 p-2 rounded-md cursor-pointer mb-1 transition-all ${
+                        index === activeStepIndex 
+                          ? "bg-primary/10 text-primary" 
+                          : "hover:bg-muted"
+                      }`}
+                      onClick={() => handleStepChange(index)}
+                    >
+                      <div className={`flex items-center justify-center h-5 w-5 rounded-full text-xs font-medium mt-0.5 ${
+                        index < activeStepIndex 
+                          ? "bg-primary/20" 
+                          : index === activeStepIndex 
+                            ? "bg-primary/20 text-primary" 
+                            : "bg-muted text-muted-foreground"
                       }`}>
-                        {step.title}
+                        {index < activeStepIndex ? (
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                        ) : (
+                          <span>{index + 1}</span>
+                        )}
                       </div>
-                      {index === activeStepIndex && (
-                        <Badge variant="secondary" className="mt-1 text-xs">
-                          Current
-                        </Badge>
-                      )}
+                      <div>
+                        <div className={`text-sm font-medium ${
+                          index === activeStepIndex ? "text-primary" : ""
+                        }`}>
+                          {step.title}
+                        </div>
+                        {index === activeStepIndex && (
+                          <Badge variant="secondary" className="mt-1 text-xs">
+                            Current
+                          </Badge>
+                        )}
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    No course steps available
                   </div>
-                ))}
+                )}
               </div>
             </ScrollArea>
           </div>
