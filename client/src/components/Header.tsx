@@ -1,4 +1,4 @@
-import { Code, FileText, Bot, User, LogIn, Settings, LogOut } from "lucide-react";
+import { Code, FileText, Bot, User, LogIn, Settings, LogOut, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -92,6 +92,18 @@ export default function Header() {
                       </div>
                     </Link>
                   </DropdownMenuItem>
+                  
+                  {/* Admin link - only visible for admin user */}
+                  {user?.id === "38352714" && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">
+                        <div className="flex items-center">
+                          <ShieldAlert className="mr-2 h-4 w-4" />
+                          <span>Admin Settings</span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem 
                     onClick={() => window.location.href = "/api/logout"}

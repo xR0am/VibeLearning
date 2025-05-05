@@ -93,7 +93,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sourceInfo, 
         context, 
         model, 
-        user.openrouterApiKey
+        user.openrouterApiKey,
+        sourceType
       );
       
       // Parse the JSON response from OpenRouter

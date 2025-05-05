@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getSystemPrompt } from "./admin";
 
 // Interface for OpenRouter API request
 interface OpenRouterRequest {
@@ -33,7 +34,8 @@ export async function generateCourseWithOpenRouter(
   sourceInfo: string,
   context: string,
   model: string,
-  apiKey?: string
+  apiKey?: string,
+  sourceType: "github" | "llms-txt" = "github"
 ): Promise<string> {
   // If no API key is provided, check for environment variable
   const effectiveApiKey = apiKey || process.env.OPENROUTER_API_KEY;
@@ -42,41 +44,8 @@ export async function generateCourseWithOpenRouter(
     throw new Error("OpenRouter API key is required. Please add your API key in account settings.");
   }
   
-  const systemPrompt = `
-You are an expert developer educator. Your task is to create a comprehensive, step-by-step learning course for a developer who wants to understand and implement a specific tool, repository, or content from llms.txt.
-
-Based on the provided source information (either repository details or llms.txt content) and user context, create a structured course with 5-7 logical steps. Each step should build on the previous one and help the user achieve their specific goals.
-
-IMPORTANT: You must ONLY use information explicitly documented in the provided source. DO NOT invent, assume, or create features, functionalities, methods, or options that are not clearly mentioned in the documentation or repository content. If the source is incomplete, only teach what is actually documented.
-
-Format your response as a JSON object with the following structure:
-{
-  "title": "A descriptive title for the course",
-  "steps": [
-    {
-      "id": 1,
-      "title": "Step 1 Title",
-      "content": "Detailed markdown content for step 1..."
-    },
-    {
-      "id": 2,
-      "title": "Step 2 Title",
-      "content": "Detailed markdown content for step 2..."
-    }
-    // ... more steps
-  ]
-}
-
-Make sure:
-1. The content is technically accurate and focused ONLY on what's explicitly documented
-2. Each step has clear, executable instructions based on actual documentation
-3. You include code examples directly from or closely based on the source content
-4. You explain concepts clearly for the user's level
-5. You never suggest features or options that aren't explicitly mentioned in the source
-6. If information is lacking, acknowledge limitations rather than inventing functionality
-7. The overall course helps the user achieve their specific use case within the constraints of what's documented
-8. Your response is ONLY the JSON object with no additional text
-`;
+  // Get the appropriate system prompt from admin settings based on source type
+  const systemPrompt = getSystemPrompt(sourceType === "github" ? "github" : "llmsTxt");
 
   const userPrompt = `
 Source Information:
@@ -85,7 +54,7 @@ ${sourceInfo}
 User Context/Use Case:
 ${context}
 
-Please create a custom learning course based on this information. Remember to strictly adhere to what's explicitly documented in the source information above. Do not invent or assume features that aren't clearly mentioned in the documentation. If the documentation is incomplete, acknowledge the limitations rather than filling in gaps with assumptions.
+Please create a custom learning course based on this ${sourceType === "github" ? "repository" : "llms.txt file"} and the user's specific needs. Remember to strictly adhere to what's explicitly documented in the source information above. Do not invent or assume features that aren't clearly mentioned in the documentation.
 `;
 
   try {

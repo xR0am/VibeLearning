@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { Progress } from "@/components/ui/progress";
-import { Loader2, FileText, Code, Binary, Check } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Bot, Github, FileText, Sparkles, Zap, Code, CheckCircle2 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface CourseGenerationProgressProps {
   sourceType: "github" | "llms-txt";
@@ -8,121 +9,111 @@ interface CourseGenerationProgressProps {
 
 export default function CourseGenerationProgress({ sourceType }: CourseGenerationProgressProps) {
   const [currentStage, setCurrentStage] = useState(0);
-  const [progressValue, setProgressValue] = useState(0);
-
-  // Define the stages of course generation
+  const [progress, setProgress] = useState(0);
+  
+  // Stages of course generation
   const stages = [
-    { 
-      id: 1, 
-      title: sourceType === "github" ? "Analyzing repository..." : "Processing llms.txt...",
-      icon: sourceType === "github" ? Code : FileText,
-      duration: 1500 
+    {
+      title: sourceType === "github" ? "Analyzing repository" : "Analyzing llms.txt content",
+      description: sourceType === "github" 
+        ? "Scanning repository structure, code files, README, and documentation..." 
+        : "Parsing llms.txt file contents, extracting key information...",
+      icon: sourceType === "github" ? Github : FileText,
+      durationMs: 3000
     },
-    { 
-      id: 2, 
-      title: "Extracting key concepts...", 
-      icon: Binary,
-      duration: 3000 
+    {
+      title: "Organizing course structure",
+      description: "Creating a logical learning path based on dependency relationships...",
+      icon: Code,
+      durationMs: 3000
     },
-    { 
-      id: 3, 
-      title: "Structuring course content...", 
-      icon: FileText,
-      duration: 2500 
+    {
+      title: "Generating tutorial content",
+      description: "Crafting detailed explanations, code samples, and step-by-step instructions...",
+      icon: Bot,
+      durationMs: 5000
     },
-    { 
-      id: 4, 
-      title: "Generating step-by-step instructions...", 
-      icon: Binary,
-      duration: 4000 
+    {
+      title: "Finalizing course",
+      description: "Wrapping up and preparing the interactive learning experience...",
+      icon: Sparkles,
+      durationMs: 2000
     },
-    { 
-      id: 5, 
-      title: "Finalizing course...", 
-      icon: Loader2,
-      duration: 2000 
+    {
+      title: "Course ready!",
+      description: "Your custom learning course has been generated successfully.",
+      icon: CheckCircle2,
+      durationMs: 1000
     }
   ];
 
+  // Auto-advance through stages for visual effect
   useEffect(() => {
+    const totalStages = stages.length;
     let timer: NodeJS.Timeout;
-    const totalDuration = stages.reduce((acc, stage) => acc + stage.duration, 0);
-    let elapsed = 0;
-
-    const updateProgress = () => {
-      if (elapsed < totalDuration) {
-        // Find current stage
-        let durationSum = 0;
-        let currentStageIndex = 0;
+    
+    if (currentStage < totalStages) {
+      const currentDuration = stages[currentStage].durationMs;
+      
+      // Progress bar animation
+      const startTime = Date.now();
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const newProgress = Math.min(100, (elapsed / currentDuration) * 100);
+        setProgress(newProgress);
         
-        for (let i = 0; i < stages.length; i++) {
-          durationSum += stages[i].duration;
-          if (elapsed < durationSum) {
-            currentStageIndex = i;
-            break;
-          }
+        if (newProgress >= 100 && currentStage < totalStages - 1) {
+          clearInterval(interval);
+          setCurrentStage(prev => prev + 1);
+          setProgress(0);
         }
-        
-        setCurrentStage(currentStageIndex);
-        
-        // Calculate progress percentage (0-100)
-        const progressPercentage = (elapsed / totalDuration) * 100;
-        setProgressValue(Math.min(progressPercentage, 99)); // Cap at 99% until completion
-        
-        elapsed += 100; // Increment by 100ms
-        timer = setTimeout(updateProgress, 100);
-      } else {
-        // Ensure the last stage is active and progress is at 99%
-        setCurrentStage(stages.length - 1);
-        setProgressValue(99);
-      }
-    };
-
-    // Start the progress animation
-    timer = setTimeout(updateProgress, 100);
-
+      }, 50);
+      
+      // Move to next stage after duration
+      timer = setTimeout(() => {
+        clearInterval(interval);
+        if (currentStage < totalStages - 1) {
+          setCurrentStage(prev => prev + 1);
+          setProgress(0);
+        }
+      }, currentDuration);
+    }
+    
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+  }, [currentStage, stages]);
 
+  const CurrentIcon = stages[currentStage].icon;
+  
   return (
-    <div className="space-y-8 max-w-md mx-auto">
-      <h3 className="text-xl font-semibold text-center">Preparing Your Course</h3>
-      
-      <Progress value={progressValue} className="h-2 w-full" />
-      
-      <div className="space-y-3">
-        {stages.map((stage, index) => {
-          const StageIcon = stage.icon;
-          const isActive = index === currentStage;
-          const isCompleted = index < currentStage;
-          
-          return (
-            <div 
-              key={stage.id} 
-              className={`flex items-center gap-3 p-3 rounded-md transition-colors ${
-                isActive ? "bg-primary/10 text-primary" : 
-                isCompleted ? "text-muted-foreground" : 
-                "text-muted-foreground/50"
-              }`}
-            >
-              <div className="rounded-full w-8 h-8 flex items-center justify-center">
-                {isCompleted ? (
-                  <Check className="h-5 w-5" />
-                ) : (
-                  <StageIcon className={`h-5 w-5 ${isActive ? "animate-pulse" : ""}`} />
-                )}
-              </div>
-              <span className={isActive ? "font-medium" : ""}>{stage.title}</span>
-            </div>
-          );
-        })}
+    <div className="w-full max-w-md mx-auto px-4 py-8 text-center">
+      <div className="mb-6">
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mx-auto bg-primary/10 rounded-full p-5 flex items-center justify-center mb-6 w-24 h-24"
+        >
+          <CurrentIcon className="h-12 w-12 text-primary animate-pulse" />
+        </motion.div>
+        
+        <h2 className="text-2xl font-bold mb-2">{stages[currentStage].title}</h2>
+        <p className="text-muted-foreground mb-4">{stages[currentStage].description}</p>
       </div>
       
-      <p className="text-center text-sm text-muted-foreground">
-        This process typically takes 30-60 seconds depending on repository size and complexity.
-      </p>
+      <div className="space-y-5 mb-6 w-full">
+        <Progress value={progress} className="h-2 w-full" />
+        <div className="text-sm text-muted-foreground flex items-center justify-between">
+          <span>Progress</span>
+          <span className="font-medium">{Math.round(progress)}%</span>
+        </div>
+      </div>
+      
+      <div className="flex justify-center space-x-1 text-xs text-muted-foreground">
+        <Zap className="h-3.5 w-3.5 mr-1" />
+        <span>Powered by OpenRouter AI</span>
+      </div>
     </div>
   );
 }
