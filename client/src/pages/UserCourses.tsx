@@ -9,12 +9,13 @@ import { Button } from "@/components/ui/button";
 import { FileText, ExternalLink, Lock, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CourseContent } from "@/types";
+import { CourseWithTags } from "@shared/schema";
 
 export default function UserCourses() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [selectedCourse, setSelectedCourse] = useState<CourseContent | null>(null);
 
-  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+  const { data: courses = [], isLoading: coursesLoading } = useQuery<CourseWithTags[]>({
     queryKey: ["/api/courses/user"],
     enabled: isAuthenticated,
   });
@@ -109,11 +110,34 @@ export default function UserCourses() {
                       className="w-full"
                       onClick={() => {
                         // Handle view course - will redirect or open in a modal
+                        let parsedSteps;
+                        try {
+                          // Try standard JSON parsing first
+                          parsedSteps = JSON.parse(course.content);
+                        } catch (error) {
+                          console.log("Initial JSON parse failed, attempting to extract valid JSON...");
+                          try {
+                            // If it fails, try to extract valid JSON using regex
+                            const jsonMatch = course.content.match(/(\{[\s\S]*\})/);
+                            if (jsonMatch && jsonMatch[0]) {
+                              parsedSteps = JSON.parse(jsonMatch[0]);
+                              console.log("Successfully extracted JSON from response");
+                            } else {
+                              console.error("Failed to extract valid JSON", error);
+                              // Default to empty array if all parsing attempts fail
+                              parsedSteps = [];
+                            }
+                          } catch (secondError) {
+                            console.error("Failed to extract valid JSON", secondError);
+                            parsedSteps = [];
+                          }
+                        }
+                        
                         const courseContent: CourseContent = {
                           title: course.title,
                           repoUrl: course.repoUrl,
                           context: course.context,
-                          steps: JSON.parse(course.content)
+                          steps: parsedSteps
                         };
                         setSelectedCourse(courseContent);
                       }}

@@ -16,8 +16,9 @@ export default function Home() {
   const [courseContent, setCourseContent] = useState<CourseContentType | null>(null);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [currentSourceType, setCurrentSourceType] = useState<SourceType>("github");
-  const [view, setView] = useState<'home' | 'course'>('home');
+  const [view, setView] = useState<'home' | 'course' | 'generating'>('home');
   
   // Reset active step when course content changes
   useEffect(() => {
@@ -28,20 +29,30 @@ export default function Home() {
   }, [courseContent]);
 
   const handleCourseSelect = (course: CourseContentType, sourceType: SourceType) => {
-    setIsLoading(true);
     setCurrentSourceType(sourceType);
     
-    // Simulate loading to provide better UX
-    setTimeout(() => {
-      setCourseContent(course);
-      setIsLoading(false);
+    // If the course has empty steps, it means we're starting generation
+    if (course.steps.length === 0) {
+      setIsGenerating(true);
+      setView('generating');
       
       // Scroll to top
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
-    }, 13000); // Longer time to allow progress animation to play
+      return;
+    }
+    
+    // If course has steps, the generation is complete
+    setIsGenerating(false);
+    setCourseContent(course);
+    
+    // Scroll to top
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
   
   const handleBackToHome = () => {
@@ -61,9 +72,9 @@ export default function Home() {
       <Header />
       
       <AnimatePresence mode="wait">
-        {isLoading ? (
+        {view === 'generating' ? (
           <motion.div 
-            key="loading"
+            key="generating"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -119,11 +119,34 @@ export default function PublicCourses() {
                       className="w-full"
                       onClick={() => {
                         // Handle view course
+                        let parsedSteps;
+                        try {
+                          // Try standard JSON parsing first
+                          parsedSteps = JSON.parse(course.content);
+                        } catch (error) {
+                          console.log("Initial JSON parse failed, attempting to extract valid JSON...");
+                          try {
+                            // If it fails, try to extract valid JSON using regex
+                            const jsonMatch = course.content.match(/(\{[\s\S]*\})/);
+                            if (jsonMatch && jsonMatch[0]) {
+                              parsedSteps = JSON.parse(jsonMatch[0]);
+                              console.log("Successfully extracted JSON from response");
+                            } else {
+                              console.error("Failed to extract valid JSON", error);
+                              // Default to empty array if all parsing attempts fail
+                              parsedSteps = [];
+                            }
+                          } catch (secondError) {
+                            console.error("Failed to extract valid JSON", secondError);
+                            parsedSteps = [];
+                          }
+                        }
+                        
                         const courseContent: CourseContent = {
                           title: course.title,
                           repoUrl: course.repoUrl,
                           context: course.context,
-                          steps: JSON.parse(course.content)
+                          steps: parsedSteps
                         };
                         setSelectedCourse(courseContent);
                       }}
