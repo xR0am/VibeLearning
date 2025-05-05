@@ -80,7 +80,19 @@ export default function Home() {
             exit={{ opacity: 0 }}
             className="flex-grow flex items-center justify-center py-20"
           >
-            <CourseGenerationProgress sourceType={currentSourceType} />
+            <CourseGenerationProgress 
+              sourceType={currentSourceType}
+              onComplete={() => {
+                if (courseContent) {
+                  setView('course');
+                  // Scroll to top
+                  window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                  });
+                }
+              }}
+            />
           </motion.div>
         ) : view === 'home' ? (
           <motion.main 

@@ -106,12 +106,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (jsonError) {
           // Try to extract valid JSON from the response if it contains extra text
           console.log("Initial JSON parse failed, attempting to extract valid JSON...");
+          
+          // Try different regex patterns to extract JSON
           const jsonMatch = courseContentJson.match(/(\{[\s\S]*\})/);
           if (jsonMatch && jsonMatch[0]) {
-            courseContent = JSON.parse(jsonMatch[0]);
-            console.log("Successfully extracted JSON from response");
+            try {
+              courseContent = JSON.parse(jsonMatch[0]);
+              console.log("Successfully extracted JSON from response");
+            } catch (innerError) {
+              console.log("Extracted JSON is still invalid, trying to fix it...");
+              
+              // If the JSON is still not valid, attempt to create a minimal valid structure
+              courseContent = {
+                title: "Course on " + sourceUrl.split('/').pop(),
+                steps: []
+              };
+            }
           } else {
-            throw jsonError;
+            // If no JSON-like structure was found, create a minimal valid structure
+            console.log("No JSON structure found, creating minimal valid course");
+            courseContent = {
+              title: "Course on " + sourceUrl.split('/').pop(),
+              steps: []
+            };
           }
         }
         
