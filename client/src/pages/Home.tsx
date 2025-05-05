@@ -43,7 +43,15 @@ export default function Home() {
   };
   
   const handleBackToHome = () => {
+    setCourseContent(null);
+    setActiveStepIndex(0);
     setView('home');
+    
+    // Scroll to top
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   return (
@@ -75,13 +83,8 @@ export default function Home() {
           >
             <IntroSection />
             
-            <div className="grid md:grid-cols-12 gap-6">
-              <div className="md:col-span-8">
-                <RepoInputForm onCourseGenerated={handleCourseSelect} />
-              </div>
-              <div className="md:col-span-4">
-                <SavedCourses onSelectCourse={handleCourseSelect} />
-              </div>
+            <div className="mb-8">
+              <RepoInputForm onCourseGenerated={handleCourseSelect} />
             </div>
             
             <PublicCourseLibrary />

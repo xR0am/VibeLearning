@@ -47,7 +47,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface RepoInputFormProps {
-  onCourseGenerated: (course: CourseContent) => void;
+  onCourseGenerated: (course: CourseContent, sourceType: SourceType) => void;
 }
 
 export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps) {
@@ -81,7 +81,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
       return response.json();
     },
     onSuccess: (data: CourseContent) => {
-      onCourseGenerated(data);
+      onCourseGenerated(data, sourceType);
       toast({
         title: "Course generated successfully!",
         description: `Your custom course for ${data.repoUrl} has been created.`,
