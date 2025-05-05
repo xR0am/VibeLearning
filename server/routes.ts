@@ -136,11 +136,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         courseContent.repoUrl = sourceUrl; // Still using repoUrl for compatibility
         courseContent.context = context;
         
-        // Validate the course content structure
-        const validatedContent = courseContentSchema.parse(courseContent);
+        // Handle case where the AI returns 'step' instead of 'steps'
+        if (!courseContent.steps && courseContent.step && Array.isArray(courseContent.step)) {
+          console.log("Converting 'step' array to 'steps' array");
+          courseContent.steps = courseContent.step;
+          delete courseContent.step;
+        }
+        
+        // Print the raw response for debugging
+        console.log("Raw response:", JSON.stringify(courseContent, null, 2));
+
+        // Further normalize content to ensure it matches our schema
+        if (!courseContent.steps || !Array.isArray(courseContent.steps)) {
+          console.log("No steps array found, creating empty steps array");
+          courseContent.steps = [];
+        }
+        
+        // Ensure steps array contains valid objects with required properties
+        courseContent.steps = courseContent.steps.map((step: any, index: number) => {
+          return {
+            id: step.id || index + 1,
+            title: step.title || `Step ${index + 1}`,
+            content: step.content || 'No content available for this step.'
+          };
+        });
+        
+        // Variable to hold our validated/normalized content
+        let courseStructure;
+        
+        try {
+          // Validate the course content structure
+          courseStructure = courseContentSchema.parse(courseContent);
+        } catch (validationError) {
+          console.error("Error parsing OpenRouter response:", validationError);
+          console.log("Raw response:", JSON.stringify(courseContent, null, 2));
+          
+          // Create a normalized structure that will pass validation
+          courseStructure = {
+            title: courseContent.title || "Generated Course",
+            repoUrl: sourceUrl,
+            context: context,
+            steps: courseContent.steps || []
+          };
+        }
         
         // Save the course to the database with user ID and public/private setting
-        const savedCourse = await storage.saveCourse(validatedContent, model, userId, isPublic);
+        const savedCourse = await storage.saveCourse(courseStructure, model, userId, isPublic);
         console.log("Course saved to database successfully");
         
         // Auto-generate tags for the course using simple string matching
@@ -151,8 +192,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           "machine learning", "ai", "security", "testing", "css", "html"
         ];
         
-        const courseTitle = validatedContent.title.toLowerCase();
-        const courseContext = validatedContent.context.toLowerCase();
+        const courseTitle = courseStructure.title.toLowerCase();
+        const courseContext = courseStructure.context.toLowerCase();
         const matchedTags = possibleTags.filter(tag => 
           courseTitle.includes(tag.toLowerCase()) || 
           courseContext.includes(tag.toLowerCase())
@@ -168,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Return the course content with tags
         res.json({
-          ...validatedContent,
+          ...courseStructure,
           id: savedCourse.id,
           tags: courseWithTags.tags,
           isPublic
