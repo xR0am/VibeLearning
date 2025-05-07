@@ -4,10 +4,10 @@ import { CourseContent, ComplexityLevel } from "@shared/schema";
  * Maps complexity levels to emoji representations
  */
 export const complexityEmojis: Record<ComplexityLevel, string> = {
-  beginner: "🌱", // Sprout - for beginners
-  intermediate: "🌟", // Star - for intermediate
-  advanced: "🔥", // Fire - for advanced
-  expert: "🚀", // Rocket - for expert level
+  beginner: "🌱",
+  intermediate: "🌿",
+  advanced: "🌲",
+  expert: "🌳"
 };
 
 /**
@@ -19,77 +19,109 @@ export const complexityEmojis: Record<ComplexityLevel, string> = {
  * - Step length
  */
 export function computeCourseComplexity(course: CourseContent): ComplexityLevel {
-  if (!course?.steps?.length) return "beginner";
+  if (!course || !course.steps || course.steps.length === 0) {
+    return "beginner";
+  }
   
-  // If already computed, return existing complexity
-  if (course.complexity) return course.complexity;
+  // Get all content as one string for analysis
+  const allContent = course.steps.map(step => step.content).join(" ");
   
-  const totalSteps = course.steps.length;
+  // Base score starts from 0
   let complexityScore = 0;
   
-  // Factor 1: Number of steps
-  if (totalSteps <= 5) complexityScore += 1;
-  else if (totalSteps <= 10) complexityScore += 2;
-  else if (totalSteps <= 15) complexityScore += 3;
-  else complexityScore += 4;
-
-  // Factor 2: Content length
-  const totalContentLength = course.steps.reduce((sum, step) => sum + step.content.length, 0);
-  const avgContentLength = totalContentLength / totalSteps;
+  // Factor 1: Number of steps (more steps likely means more complexity)
+  const stepCount = course.steps.length;
+  if (stepCount <= 3) complexityScore += 0;
+  else if (stepCount <= 5) complexityScore += 1;
+  else if (stepCount <= 8) complexityScore += 2;
+  else complexityScore += 3;
   
-  if (avgContentLength < 500) complexityScore += 1; 
-  else if (avgContentLength < 1000) complexityScore += 2;
-  else if (avgContentLength < 2000) complexityScore += 3;
-  else complexityScore += 4;
-
-  // Factor 3: Complexity keywords in content
-  const complexityKeywords = {
-    beginner: ["basic", "simple", "introduction", "getting started", "beginner"],
-    intermediate: ["implementation", "extend", "moderate", "function", "intermediate"],
-    advanced: ["complex", "optimize", "advanced", "algorithm", "architecture"],
-    expert: ["expert", "mastery", "high performance", "scalable", "production-grade"]
-  };
-
-  // Check for complexity keywords in title and context
-  let keywordScore = 0;
-  const combinedText = (course.title + " " + course.context).toLowerCase();
+  // Factor 2: Average step length (longer steps typically contain more detailed/complex information)
+  const averageStepLength = allContent.length / stepCount;
+  if (averageStepLength < 500) complexityScore += 0;
+  else if (averageStepLength < 1000) complexityScore += 1;
+  else if (averageStepLength < 2000) complexityScore += 2;
+  else complexityScore += 3;
   
-  for (const keyword of complexityKeywords.beginner) {
-    if (combinedText.includes(keyword)) keywordScore = Math.max(keywordScore, 1);
-  }
+  // Factor 3: Code block density
+  const codeBlockMatches = allContent.match(/```[\s\S]*?```/g);
+  const codeBlockCount = codeBlockMatches ? codeBlockMatches.length : 0;
+  const codeBlockDensity = codeBlockCount / stepCount;
   
-  for (const keyword of complexityKeywords.intermediate) {
-    if (combinedText.includes(keyword)) keywordScore = Math.max(keywordScore, 2);
-  }
+  if (codeBlockDensity < 0.5) complexityScore += 0;
+  else if (codeBlockDensity < 1) complexityScore += 1;
+  else if (codeBlockDensity < 2) complexityScore += 2;
+  else complexityScore += 3;
   
-  for (const keyword of complexityKeywords.advanced) {
-    if (combinedText.includes(keyword)) keywordScore = Math.max(keywordScore, 3);
-  }
+  // Factor 4: Complexity keywords
+  const beginnerKeywords = [
+    "basic", "introduction", "getting started", "beginner", "simple",
+    "fundamental", "overview", "elementary", "primer", "101"
+  ];
   
-  for (const keyword of complexityKeywords.expert) {
-    if (combinedText.includes(keyword)) keywordScore = Math.max(keywordScore, 4);
-  }
+  const intermediateKeywords = [
+    "intermediate", "build upon", "develop", "extend", "improve",
+    "practical", "implement", "create", "setup", "configure"
+  ];
   
-  complexityScore += keywordScore;
+  const advancedKeywords = [
+    "advanced", "complex", "optimize", "performance", "security",
+    "scale", "architecture", "design patterns", "best practices", "efficient"
+  ];
   
-  // Factor 4: Code complexity based on likely presence of code blocks
-  const codeBlockCount = course.steps.reduce((count, step) => {
-    const codeBlockMatches = step.content.match(/```[a-zA-Z]*\n[\s\S]*?\n```/g);
-    return count + (codeBlockMatches ? codeBlockMatches.length : 0);
-  }, 0);
+  const expertKeywords = [
+    "expert", "mastery", "cutting-edge", "specialized", "sophisticated",
+    "intricate", "comprehensive", "high-performance", "deep dive", "internals"
+  ];
   
-  if (codeBlockCount <= 3) complexityScore += 1;
-  else if (codeBlockCount <= 8) complexityScore += 2;
-  else if (codeBlockCount <= 15) complexityScore += 3;
-  else complexityScore += 4;
+  // Count keyword occurrences (case insensitive)
+  const lowerContent = allContent.toLowerCase();
   
-  // Calculate average score and map to complexity level
-  const avgScore = complexityScore / 4; // We used 4 factors
+  let beginnerCount = beginnerKeywords.reduce((count, keyword) => 
+    count + (lowerContent.includes(keyword) ? 1 : 0), 0);
+    
+  let intermediateCount = intermediateKeywords.reduce((count, keyword) => 
+    count + (lowerContent.includes(keyword) ? 1 : 0), 0);
+    
+  let advancedCount = advancedKeywords.reduce((count, keyword) => 
+    count + (lowerContent.includes(keyword) ? 1 : 0), 0);
+    
+  let expertCount = expertKeywords.reduce((count, keyword) => 
+    count + (lowerContent.includes(keyword) ? 1 : 0), 0);
   
-  if (avgScore < 1.5) return "beginner";
-  if (avgScore < 2.5) return "intermediate";
-  if (avgScore < 3.5) return "advanced";
-  return "expert";
+  // Normalize keyword counts (0-3 scale)
+  const keywordScore = (
+    (beginnerCount * 0) + 
+    (intermediateCount * 1) + 
+    (advancedCount * 2) + 
+    (expertCount * 3)
+  ) / Math.max(1, beginnerCount + intermediateCount + advancedCount + expertCount);
+  
+  complexityScore += Math.round(keywordScore);
+  
+  // Factor 5: Technical terminology density
+  const technicalTerms = [
+    "algorithm", "runtime", "complexity", "middleware", "framework", 
+    "architecture", "inheritance", "polymorphism", "encapsulation", 
+    "asynchronous", "concurrent", "parallel", "optimization", "refactor",
+    "dependency injection", "authentication", "authorization", "encryption",
+    "serialization", "normalization", "transaction", "orchestration"
+  ];
+  
+  let technicalTermCount = technicalTerms.reduce((count, term) => 
+    count + (lowerContent.includes(term) ? 1 : 0), 0);
+  
+  if (technicalTermCount <= 2) complexityScore += 0;
+  else if (technicalTermCount <= 5) complexityScore += 1;
+  else if (technicalTermCount <= 10) complexityScore += 2;
+  else complexityScore += 3;
+  
+  // Calculate final score (max possible is 15)
+  // Map to complexity levels
+  if (complexityScore <= 4) return "beginner";
+  else if (complexityScore <= 8) return "intermediate";
+  else if (complexityScore <= 12) return "advanced";
+  else return "expert";
 }
 
 /**
@@ -98,8 +130,7 @@ export function computeCourseComplexity(course: CourseContent): ComplexityLevel 
 export function getComplexityEmoji(complexity?: ComplexityLevel | string | null): string {
   if (!complexity) return complexityEmojis.beginner;
   
-  // Handle string type
-  if (typeof complexity === 'string' && complexity in complexityEmojis) {
+  if (Object.keys(complexityEmojis).includes(complexity as string)) {
     return complexityEmojis[complexity as ComplexityLevel];
   }
   
@@ -112,13 +143,8 @@ export function getComplexityEmoji(complexity?: ComplexityLevel | string | null)
 export function getComplexityLabel(complexity?: ComplexityLevel | string | null): string {
   if (!complexity) return `${complexityEmojis.beginner} Beginner`;
   
-  const emoji = getComplexityEmoji(complexity as ComplexityLevel);
+  const emoji = getComplexityEmoji(complexity);
+  const label = complexity.charAt(0).toUpperCase() + complexity.slice(1);
   
-  // Format complexity string
-  if (typeof complexity === 'string') {
-    const formattedComplexity = complexity.charAt(0).toUpperCase() + complexity.slice(1);
-    return `${emoji} ${formattedComplexity}`;
-  }
-  
-  return `${emoji} Unknown`;
+  return `${emoji} ${label}`;
 }

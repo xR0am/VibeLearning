@@ -1,4 +1,4 @@
-import { Code, FileText, Bot, User, LogIn, Settings, LogOut, ShieldAlert } from "lucide-react";
+import { Code, FileText, Bot, User, LogIn, Settings, LogOut, ShieldAlert, HelpCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -52,6 +52,12 @@ export default function Header() {
                 OpenRouter
               </Badge>
             </div>
+            <Link href="/how-to">
+              <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-1">
+                <HelpCircle className="h-4 w-4" />
+                <span>How-To</span>
+              </Button>
+            </Link>
             <ThemeToggle />
             
             {isAuthenticated ? (

@@ -1,7 +1,8 @@
-import { getComplexityEmoji, getComplexityLabel } from "@/lib/courseUtils";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ComplexityLevel } from "@shared/schema";
+import { getComplexityEmoji, getComplexityLabel } from "@/lib/courseUtils";
+import { cn } from "@/lib/utils";
 
 interface ComplexityBadgeProps {
   complexity?: ComplexityLevel | string | null;
@@ -12,49 +13,51 @@ interface ComplexityBadgeProps {
 
 export default function ComplexityBadge({
   complexity,
-  showLabel = true,
+  showLabel = false,
   className,
-  size = "md"
+  size = "md",
 }: ComplexityBadgeProps) {
   const emoji = getComplexityEmoji(complexity);
   const label = getComplexityLabel(complexity);
+  const complexityValue = (complexity || "beginner") as ComplexityLevel;
   
+  // Determine color based on complexity
+  const colorMap: Record<ComplexityLevel, string> = {
+    beginner: "bg-green-50/50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400",
+    intermediate: "bg-blue-50/50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400",
+    advanced: "bg-orange-50/50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-400",
+    expert: "bg-red-50/50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400",
+  };
+  
+  // Size classes
   const sizeClasses = {
-    sm: "text-xs py-0 px-2",
+    sm: "text-xs py-0.5 px-1.5",
     md: "text-sm py-1 px-2",
-    lg: "text-base py-1 px-3"
+    lg: "text-base py-1 px-2.5"
   };
   
-  // Colors based on complexity level
-  const getComplexityColor = () => {
-    if (!complexity) return "bg-primary/10 text-primary border-primary/20";
-    
-    switch(complexity) {
-      case "beginner":
-        return "bg-green-500/10 text-green-500 border-green-500/20";
-      case "intermediate":
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-      case "advanced":
-        return "bg-amber-500/10 text-amber-500 border-amber-500/20";
-      case "expert":
-        return "bg-red-500/10 text-red-500 border-red-500/20";
-      default:
-        return "bg-primary/10 text-primary border-primary/20";
-    }
-  };
+  const badgeContent = showLabel ? label : emoji;
   
   return (
-    <Badge 
-      variant="outline" 
-      className={cn(
-        "font-normal border",
-        sizeClasses[size],
-        getComplexityColor(),
-        className
-      )}
-    >
-      <span className="mr.5">{emoji}</span>
-      {showLabel && <span className="ml-1">{showLabel ? label.split(' ')[1] : ''}</span>}
-    </Badge>
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <Badge 
+            variant="outline"
+            className={cn(
+              colorMap[complexityValue],
+              sizeClasses[size],
+              "font-medium hover:opacity-80 transition-opacity",
+              className
+            )}
+          >
+            {badgeContent}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top" align="center" className="font-medium">
+          {showLabel ? emoji : label} Complexity
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

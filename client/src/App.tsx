@@ -11,6 +11,7 @@ import PublicCourses from "@/pages/PublicCourses";
 import Course from "@/pages/Course";
 import Admin from "@/pages/Admin";
 import LoaderDemo from "@/pages/LoaderDemo";
+import HowTo from "@/pages/HowTo";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
 
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/courses/public" component={PublicCourses} />
       <Route path="/admin" component={Admin} />
       <Route path="/loader-demo" component={LoaderDemo} />
+      <Route path="/how-to" component={HowTo} />
       <Route path="/course/:id" component={Course} />
       <Route component={NotFound} />
     </Switch>
