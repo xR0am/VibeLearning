@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CodeLoader } from "@/components/ui/code-loader";
 import { 
   Globe, 
   Code, 
@@ -131,23 +132,8 @@ export default function PublicCourseLibrary() {
       
       <CardContent>
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="border overflow-hidden">
-                <CardHeader className="p-4 pb-3 border-b">
-                  <Skeleton className="h-5 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2" />
-                </CardHeader>
-                <CardContent className="p-4 pt-3">
-                  <Skeleton className="h-5 w-1/3 mb-3" />
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                  <Skeleton className="h-4 w-24 mt-3" />
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex justify-center items-center py-16">
+            <CodeLoader variant="code" size="lg" text="Loading public courses..." />
           </div>
         ) : error ? (
           <div className="text-center py-8">

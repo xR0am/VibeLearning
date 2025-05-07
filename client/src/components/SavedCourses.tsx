@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CodeLoader } from "@/components/ui/code-loader";
 
 export default function SavedCourses({ onSelectCourse }: { onSelectCourse: (course: any) => void }) {
   const { toast } = useToast();
@@ -66,7 +67,7 @@ export default function SavedCourses({ onSelectCourse }: { onSelectCourse: (cour
         <CardContent className="pt-0">
           {isLoading ? (
             <div className="py-8 flex justify-center">
-              <Sparkles className="h-8 w-8 animate-pulse text-primary" />
+              <CodeLoader variant="pulse" size="sm" text="Loading courses..." />
             </div>
           ) : courses && courses.length > 0 ? (
             <ScrollArea className="h-[280px] custom-scrollbar">
@@ -81,11 +82,11 @@ export default function SavedCourses({ onSelectCourse }: { onSelectCourse: (cour
                     <div className="mt-2 flex flex-wrap gap-2">
                       <Badge variant="outline" className="flex items-center gap-1 bg-blue-50/30 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                         <Calendar className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                        {new Date(course.createdAt).toLocaleDateString()}
+                        {course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'Recent'}
                       </Badge>
                       <Badge variant="outline" className="flex items-center gap-1 bg-purple-50/30 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800">
                         <Bot className="h-3 w-3 text-purple-600 dark:text-purple-400" />
-                        {course.modelUsed.split("/").pop()?.replace(":free", " (Free)")}
+                        {course.modelUsed ? course.modelUsed.split("/").pop()?.replace(":free", " (Free)") : 'AI Model'}
                       </Badge>
                     </div>
                   </div>
