@@ -37,7 +37,28 @@ import { Github, FileText, Loader2, Sparkles, Bot, Globe, Lock } from "lucide-re
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const formSchema = z.object({
-  sourceUrl: z.string().min(1, { message: "Source URL is required" }),
+  sourceUrl: z.string()
+    .min(1, { message: "Source URL is required" })
+    .superRefine((url, ctx) => {
+      // Different validation based on source type
+      if (ctx.path[0] === 'sourceUrl' && ctx.data.sourceType === 'github') {
+        // GitHub URL validation
+        if (!(url.includes('github.com/') || url.includes('github.io/'))) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Must be a valid GitHub repository URL"
+          });
+        }
+      } else if (ctx.path[0] === 'sourceUrl' && ctx.data.sourceType === 'llms-txt') {
+        // llms.txt URL validation
+        if (!(url.endsWith('llms.txt') || url.endsWith('llms-full.txt'))) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "URL must end with llms.txt or llms-full.txt"
+          });
+        }
+      }
+    }),
   sourceType: z.enum(["github", "llms-txt"], {
     required_error: "Source type is required",
   }),

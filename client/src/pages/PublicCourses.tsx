@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import { CourseWithTags } from "@shared/schema";
 
 export default function PublicCourses() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState<CourseContent | null>(null);
+  const [, setLocation] = useLocation();
 
   const { data: courses = [], isLoading } = useQuery<CourseWithTags[]>({
     queryKey: ["/api/courses/public"],
@@ -120,39 +121,17 @@ export default function PublicCourses() {
                       variant="default" 
                       className="w-full"
                       onClick={() => {
-                        // Handle view course
-                        let parsedSteps;
+                        // Navigate to the course page
                         try {
-                          // Try standard JSON parsing first
-                          const content = course.content as string;
-                          parsedSteps = JSON.parse(content);
-                        } catch (error) {
-                          console.log("Initial JSON parse failed, attempting to extract valid JSON...");
-                          try {
-                            // If it fails, try to extract valid JSON using regex
-                            const content = course.content as string;
-                            const jsonMatch = content.match(/(\{[\s\S]*\})/);
-                            if (jsonMatch && jsonMatch[0]) {
-                              parsedSteps = JSON.parse(jsonMatch[0]);
-                              console.log("Successfully extracted JSON from response");
-                            } else {
-                              console.error("Failed to extract valid JSON", error);
-                              // Default to empty array if all parsing attempts fail
-                              parsedSteps = [];
-                            }
-                          } catch (secondError) {
-                            console.error("Failed to extract valid JSON", secondError);
-                            parsedSteps = [];
+                          // Store the course data in sessionStorage to pass it to the course page
+                          if (typeof window !== 'undefined') {
+                            // Store course ID and navigate to the course page
+                            sessionStorage.setItem('current_course_id', String(course.id));
+                            setLocation(`/course/${course.id}`);
                           }
+                        } catch (error) {
+                          console.error("Error navigating to course:", error);
                         }
-                        
-                        const courseContent: CourseContent = {
-                          title: course.title,
-                          repoUrl: course.repoUrl,
-                          context: course.context,
-                          steps: parsedSteps
-                        };
-                        setSelectedCourse(courseContent);
                       }}
                     >
                       View Course
