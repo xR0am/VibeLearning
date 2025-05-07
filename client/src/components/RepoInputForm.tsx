@@ -36,32 +36,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Github, FileText, Loader2, Sparkles, Bot, Globe, Lock } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
+// Custom validator function for URL validation
+const validateUrl = (url: string, type: "github" | "llms-txt"): boolean => {
+  if (type === "github") {
+    return url.includes('github.com/') || url.includes('github.io/');
+  } else if (type === "llms-txt") {
+    return url.endsWith('llms.txt') || url.endsWith('llms-full.txt');
+  }
+  return true;
+};
+
 const formSchema = z.object({
-  sourceUrl: z.string()
-    .min(1, { message: "Source URL is required" })
-    .superRefine((url, ctx) => {
-      // Different validation based on source type
-      if (ctx.path[0] === 'sourceUrl' && ctx.data.sourceType === 'github') {
-        // GitHub URL validation
-        if (!(url.includes('github.com/') || url.includes('github.io/'))) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "Must be a valid GitHub repository URL"
-          });
-        }
-      } else if (ctx.path[0] === 'sourceUrl' && ctx.data.sourceType === 'llms-txt') {
-        // llms.txt URL validation
-        if (!(url.endsWith('llms.txt') || url.endsWith('llms-full.txt'))) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: "URL must end with llms.txt or llms-full.txt"
-          });
-        }
-      }
-    }),
   sourceType: z.enum(["github", "llms-txt"], {
     required_error: "Source type is required",
   }),
+  sourceUrl: z.string()
+    .min(1, { message: "Source URL is required" }),
   context: z.string().min(1, { message: "Context is required" }),
   model: z.string().min(1, { message: "Model selection is required" }),
   isPublic: z.boolean().default(false),
@@ -150,6 +140,21 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
     // Check if user is authenticated but doesn't have an API key
     if (isAuthenticated && !user?.openrouterApiKey) {
       setIsApiKeyPromptOpen(true);
+      return;
+    }
+    
+    // Validate URL based on source type
+    const isUrlValid = validateUrl(data.sourceUrl, data.sourceType);
+    if (!isUrlValid) {
+      // Set manual form error
+      const errorMessage = data.sourceType === 'github' 
+        ? "Must be a valid GitHub repository URL" 
+        : "URL must end with llms.txt or llms-full.txt";
+      
+      form.setError("sourceUrl", { 
+        type: "manual", 
+        message: errorMessage
+      });
       return;
     }
     
