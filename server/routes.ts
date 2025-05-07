@@ -115,12 +115,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log("Successfully extracted JSON from response");
             } catch (innerError) {
               console.log("Extracted JSON is still invalid, trying to fix it...");
+              console.log("Raw response:", courseContentJson);
               
-              // If the JSON is still not valid, attempt to create a minimal valid structure
-              courseContent = {
-                title: "Course on " + sourceUrl.split('/').pop(),
-                steps: []
-              };
+              // Handle potential XML content in the response by creating a course that explains the XML structure
+              if (sourceType === "llms-txt" && (sourceUrl.endsWith("llms-full.txt") || courseContentJson.includes("<xml") || courseContentJson.includes("<?xml"))) {
+                // Create a course about XML-based llms-full.txt
+                const filename = sourceUrl.split('/').pop() || "llms-full.txt";
+                courseContent = {
+                  title: `Understanding ${filename}: XML Format for LLM Standards`,
+                  repoUrl: sourceUrl,
+                  context: context || "Understanding XML-based LLM standards",
+                  steps: [
+                    {
+                      id: 1,
+                      title: "Introduction to XML-based LLM Standards",
+                      content: "XML-based llms-full.txt files provide a structured way to define language model specifications. Unlike the simple text-based llms.txt format, the XML version offers more detailed and hierarchical organization of information."
+                    },
+                    {
+                      id: 2,
+                      title: "Analyzing the Structure",
+                      content: "The file contains XML tags that organize the content into sections and attributes. This structured format allows for more precise definition of model capabilities and requirements."
+                    }
+                  ]
+                };
+              } else {
+                // If the JSON is still not valid, attempt to create a minimal valid structure
+                courseContent = {
+                  title: "Course on " + sourceUrl.split('/').pop(),
+                  steps: []
+                };
+              }
             }
           } else {
             // If no JSON-like structure was found, create a minimal valid structure

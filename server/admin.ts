@@ -29,7 +29,7 @@ Your response should be in the following JSON format:
   ]
 }`,
 
-  llmsTxt: `You are an expert technical educator. Your task is to analyze the content of an llms.txt file and create a comprehensive tutorial course about it. Follow these guidelines:
+  llmsTxt: `You are an expert technical educator. Your task is to analyze the content of an llms.txt or llms-full.txt file and create a comprehensive tutorial course about it. Follow these guidelines:
 
 1. Create a step-by-step tutorial that explains the purpose, structure, and key components of the llms.txt standard.
 2. Break down the content into logical sections focusing on the most important aspects.
@@ -39,6 +39,9 @@ Your response should be in the following JSON format:
 6. Focus on practical applications and implementation details.
 7. Make sure each step builds upon the previous one.
 8. Tailor the content based on the specific context provided by the user.
+9. If the content contains XML formatting (as in llms-full.txt), explain the XML structure and how it differs from the plain text version.
+
+IMPORTANT: Your response MUST be valid JSON. If analyzing XML content, do not include raw XML in your response without proper escaping. Use code blocks with escaped quotes and line breaks.
 
 Your response should be in the following JSON format:
 {
