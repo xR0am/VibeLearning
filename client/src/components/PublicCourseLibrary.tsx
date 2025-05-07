@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CodeLoader } from "@/components/ui/code-loader";
+import ComplexityBadge from "./ComplexityBadge";
+import { computeCourseComplexity } from "@/lib/courseUtils";
 import { 
   Globe, 
   Code, 

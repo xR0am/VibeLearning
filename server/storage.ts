@@ -110,6 +110,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async saveCourse(courseData: CourseContent, modelUsed: string, userId?: string, isPublic: boolean = false): Promise<Course> {
+    // If complexity is not provided, we'll compute it in the front-end
     const insertCourse: InsertCourse = {
       title: courseData.title,
       repoUrl: courseData.repoUrl,
@@ -117,7 +118,8 @@ export class DatabaseStorage implements IStorage {
       content: courseData as any, // Store the full course content as JSON
       modelUsed: modelUsed,
       isPublic,
-      userId
+      userId,
+      complexity: courseData.complexity
     };
     
     return await this.createCourse(insertCourse);
