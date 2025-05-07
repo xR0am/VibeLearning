@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CourseContent, SourceType } from "@/types";
+import { computeCourseComplexity } from "@/lib/courseUtils";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useModels } from "@/hooks/useModels";
@@ -90,6 +91,11 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
       return response.json();
     },
     onSuccess: (data: CourseContent) => {
+      // Compute complexity if not already set
+      if (!data.complexity) {
+        data.complexity = computeCourseComplexity(data);
+      }
+      
       onCourseGenerated(data, sourceType);
       toast({
         title: "Course generated successfully!",

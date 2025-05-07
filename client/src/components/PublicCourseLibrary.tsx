@@ -163,6 +163,10 @@ export default function PublicCourseLibrary() {
                         <FileText className="mr-1 h-3 w-3 flex-shrink-0" />
                         {course.context}
                       </Badge>
+                      <ComplexityBadge 
+                        complexity={course.complexity || 'beginner'} 
+                        size="sm"
+                      />
                     </div>
                     {course.tags && course.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-2">
