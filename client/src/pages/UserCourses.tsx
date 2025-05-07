@@ -1,27 +1,72 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect } from "wouter";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, ExternalLink, Lock, Globe } from "lucide-react";
+import { FileText, Lock, Globe, Trash2, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CodeLoader } from "@/components/ui/code-loader";
 import { CourseContent } from "@/types";
 import { CourseWithTags } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UserCourses() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [selectedCourse, setSelectedCourse] = useState<CourseContent | null>(null);
+  const [courseToDelete, setCourseToDelete] = useState<number | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: courses = [], isLoading: coursesLoading } = useQuery<CourseWithTags[]>({
     queryKey: ["/api/courses/user"],
     enabled: isAuthenticated,
   });
+  
+  // Delete course mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (courseId: number) => {
+      return await apiRequest("DELETE", `/api/courses/${courseId}`);
+    },
+    onSuccess: () => {
+      // Invalidate the courses query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["/api/courses/user"] });
+      toast({
+        title: "Course deleted",
+        description: "The course has been successfully deleted.",
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting course:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the course. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
-  const isLoading = authLoading || coursesLoading;
+  const handleDeleteCourse = (courseId: number) => {
+    deleteMutation.mutate(courseId);
+    setCourseToDelete(null);
+  };
+
+  const isLoading = authLoading || coursesLoading || deleteMutation.isPending;
 
   // If still loading, show loading indicator
   if (isLoading) {
@@ -105,48 +150,84 @@ export default function UserCourses() {
                       </div>
                     )}
                   </CardContent>
-                  <CardFooter className="pt-2">
-                    <Button 
-                      variant="default" 
-                      className="w-full"
-                      onClick={() => {
-                        // Handle view course - will redirect or open in a modal
-                        let parsedSteps;
-                        try {
-                          // Try standard JSON parsing first
-                          const content = course.content as string;
-                          parsedSteps = JSON.parse(content);
-                        } catch (error) {
-                          console.log("Initial JSON parse failed, attempting to extract valid JSON...");
+                  <CardFooter className="pt-2 flex flex-col gap-2">
+                    <div className="flex gap-2 w-full">
+                      <Button 
+                        variant="default" 
+                        className="flex-1"
+                        onClick={() => {
+                          // Handle view course - will redirect or open in a modal
+                          let parsedSteps;
                           try {
-                            // If it fails, try to extract valid JSON using regex
+                            // Try standard JSON parsing first
                             const content = course.content as string;
-                            const jsonMatch = content.match(/(\{[\s\S]*\})/);
-                            if (jsonMatch && jsonMatch[0]) {
-                              parsedSteps = JSON.parse(jsonMatch[0]);
-                              console.log("Successfully extracted JSON from response");
-                            } else {
-                              console.error("Failed to extract valid JSON", error);
-                              // Default to empty array if all parsing attempts fail
+                            parsedSteps = JSON.parse(content);
+                          } catch (error) {
+                            console.log("Initial JSON parse failed, attempting to extract valid JSON...");
+                            try {
+                              // If it fails, try to extract valid JSON using regex
+                              const content = course.content as string;
+                              const jsonMatch = content.match(/(\{[\s\S]*\})/);
+                              if (jsonMatch && jsonMatch[0]) {
+                                parsedSteps = JSON.parse(jsonMatch[0]);
+                                console.log("Successfully extracted JSON from response");
+                              } else {
+                                console.error("Failed to extract valid JSON", error);
+                                // Default to empty array if all parsing attempts fail
+                                parsedSteps = [];
+                              }
+                            } catch (secondError) {
+                              console.error("Failed to extract valid JSON", secondError);
                               parsedSteps = [];
                             }
-                          } catch (secondError) {
-                            console.error("Failed to extract valid JSON", secondError);
-                            parsedSteps = [];
                           }
-                        }
-                        
-                        const courseContent: CourseContent = {
-                          title: course.title,
-                          repoUrl: course.repoUrl,
-                          context: course.context,
-                          steps: parsedSteps
-                        };
-                        setSelectedCourse(courseContent);
-                      }}
-                    >
-                      View Course
-                    </Button>
+                          
+                          const courseContent: CourseContent = {
+                            title: course.title,
+                            repoUrl: course.repoUrl,
+                            context: course.context,
+                            steps: parsedSteps
+                          };
+                          setSelectedCourse(courseContent);
+                          window.location.href = `/course/${course.id}`;
+                        }}
+                      >
+                        View Course
+                      </Button>
+                      
+                      <AlertDialog open={courseToDelete === course.id} onOpenChange={(open) => !open && setCourseToDelete(null)}>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="icon"
+                            className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => setCourseToDelete(course.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2">
+                              <AlertTriangle className="h-5 w-5 text-destructive" />
+                              Delete Course
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this course? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => handleDeleteCourse(course.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </CardFooter>
                 </Card>
               ))}

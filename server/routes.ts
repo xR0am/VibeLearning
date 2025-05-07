@@ -363,6 +363,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // API route to delete a course
+  app.delete("/api/courses/:id([0-9]+)", isAuthenticated, async (req: any, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      if (isNaN(courseId)) {
+        return res.status(400).json({ message: "Invalid course ID" });
+      }
+      
+      const userId = req.user.claims.sub;
+      
+      // Check if course exists and belongs to the user
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      // Only allow users to delete their own courses or admin to delete any course
+      if (course.userId !== userId && userId !== ADMIN_USER_ID) {
+        return res.status(403).json({ message: "You don't have permission to delete this course" });
+      }
+      
+      // Delete the course
+      const success = await storage.deleteCourse(courseId);
+      
+      if (success) {
+        res.json({ success: true, message: "Course deleted successfully" });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to delete the course" });
+      }
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      res.status(500).json({
+        message: "Failed to delete course",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
 
   // Admin routes
   const ADMIN_USER_ID = "38352714"; // xr0am's ID
