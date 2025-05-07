@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import CourseContent from "@/components/CourseContent";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CodeLoader } from "@/components/ui/code-loader";
 import { CourseContent as CourseContentType } from "@/types";
 
 export default function Course() {

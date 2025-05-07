@@ -4,6 +4,7 @@ import { Bot, Github, FileText, Sparkles, Zap, Code, CheckCircle2, Server, Brain
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { CodeLoader } from '@/components/ui/code-loader';
 
 interface CourseGenerationProgressProps {
   sourceType: "github" | "llms-txt";
@@ -195,9 +196,19 @@ export default function CourseGenerationProgress({ sourceType, onComplete }: Cou
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="mx-auto bg-primary/10 rounded-full p-5 flex items-center justify-center mb-5 w-20 h-20"
+          className="mx-auto flex justify-center mb-5"
         >
-          <CurrentIcon className={`h-10 w-10 text-primary ${isCompleted ? '' : 'animate-pulse'}`} />
+          {isCompleted ? (
+            <div className="bg-primary/10 rounded-full p-5 flex items-center justify-center w-20 h-20">
+              <CurrentIcon className="h-10 w-10 text-primary" />
+            </div>
+          ) : (
+            <CodeLoader 
+              variant={currentStage === 0 ? "code" : currentStage === 1 ? "terminal" : currentStage === 2 ? "spinner" : "pulse"} 
+              size="md" 
+              showText={false}
+            />
+          )}
         </motion.div>
         
         <h2 className="text-xl font-bold mb-2">{stage.title}</h2>
