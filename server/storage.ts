@@ -31,6 +31,8 @@ export interface IStorage {
   getUserCourses(userId: string): Promise<Course[]>;
   createCourse(course: InsertCourse): Promise<Course>;
   saveCourse(courseData: CourseContent, modelUsed: string, userId?: string, isPublic?: boolean): Promise<Course>;
+  deleteCourse(id: number): Promise<boolean>;
+  deleteUserCourse(id: number, userId: string): Promise<boolean>;
   
   // Tag methods
   createTag(name: string): Promise<Tag>;
@@ -123,6 +125,36 @@ export class DatabaseStorage implements IStorage {
     };
     
     return await this.createCourse(insertCourse);
+  }
+  
+  async deleteCourse(id: number): Promise<boolean> {
+    try {
+      // First delete related course tags
+      await db.delete(courseTags).where(eq(courseTags.courseId, id));
+      
+      // Then delete the course
+      const result = await db.delete(courses).where(eq(courses.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      return false;
+    }
+  }
+  
+  async deleteUserCourse(id: number, userId: string): Promise<boolean> {
+    try {
+      // First check if the course belongs to the user
+      const course = await this.getCourse(id);
+      if (!course || course.userId !== userId) {
+        return false;
+      }
+      
+      // If the course belongs to the user, delete it
+      return await this.deleteCourse(id);
+    } catch (error) {
+      console.error("Error deleting user's course:", error);
+      return false;
+    }
   }
   
   // Tag methods
