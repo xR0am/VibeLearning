@@ -67,6 +67,7 @@ export const courses = pgTable("courses", {
   modelUsed: text("model_used").notNull(),
   userId: text("user_id").references(() => users.id),
   isPublic: boolean("is_public").default(false),
+  complexity: text("complexity"), // Complexity level of the course
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -103,12 +104,17 @@ export const stepSchema = z.object({
 
 export type Step = z.infer<typeof stepSchema>;
 
+// Complexity levels for courses
+export const complexityLevelEnum = z.enum(["beginner", "intermediate", "advanced", "expert"]);
+export type ComplexityLevel = z.infer<typeof complexityLevelEnum>;
+
 // Course Content Schema (not a table, used for validation)
 export const courseContentSchema = z.object({
   title: z.string(),
   repoUrl: z.string(),
   context: z.string(),
   steps: z.array(stepSchema),
+  complexity: complexityLevelEnum.optional(),
 });
 
 export type CourseContent = z.infer<typeof courseContentSchema>;
@@ -138,4 +144,5 @@ export type CourseWithTags = typeof courses.$inferSelect & {
   tags?: string[];
   isPublic: boolean;
   modelUsed: string;
+  complexity?: string;
 };
