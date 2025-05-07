@@ -42,9 +42,9 @@ export default function ComplexityBadge({
     <TooltipProvider>
       <Tooltip delayDuration={300}>
         <TooltipTrigger asChild>
-          <Badge 
-            variant="outline"
+          <div 
             className={cn(
+              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors",
               colorMap[complexityValue],
               sizeClasses[size],
               "font-medium hover:opacity-80 transition-opacity",
@@ -52,7 +52,7 @@ export default function ComplexityBadge({
             )}
           >
             {badgeContent}
-          </Badge>
+          </div>
         </TooltipTrigger>
         <TooltipContent side="top" align="center" className="font-medium">
           {showLabel ? emoji : label} Complexity

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Bot, Github, FileText, Sparkles, Zap, Code, CheckCircle2, Server, BrainCircuit } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
@@ -19,10 +19,20 @@ export default function CourseGenerationProgress({ sourceType, onComplete }: Cou
   const [statusLogs, setStatusLogs] = useState<string[]>([]);
   const [isError, setIsError] = useState(false);
   
+  // Reference to the logs container for auto-scrolling
+  const logsContainerRef = useRef<HTMLDivElement>(null);
+  
   // Add log entry with timestamp
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setStatusLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+    
+    // Auto-scroll to the bottom of the logs container
+    setTimeout(() => {
+      if (logsContainerRef.current) {
+        logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+      }
+    }, 100);
   };
   
   // Stages of course generation - adjusted durations for better UX
@@ -234,7 +244,7 @@ export default function CourseGenerationProgress({ sourceType, onComplete }: Cou
             live
           </Badge>
         </div>
-        <div className="max-h-[160px] overflow-y-auto p-3 text-left">
+        <div className="max-h-[160px] overflow-y-auto p-3 text-left" ref={logsContainerRef}>
           {statusLogs.length > 0 ? (
             <div className="space-y-1.5">
               {statusLogs.map((log, index) => (

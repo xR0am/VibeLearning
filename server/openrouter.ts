@@ -57,34 +57,61 @@ ${context}
 Please create a custom learning course based on this ${sourceType === "github" ? "repository" : "llms.txt file"} and the user's specific needs. Remember to strictly adhere to what's explicitly documented in the source information above. Do not invent or assume features that aren't clearly mentioned in the documentation.
 `;
 
-  try {
-    const response = await axios.post<OpenRouterResponse>(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        model
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${effectiveApiKey}`,
-          "Content-Type": "application/json"
+  // Retry functionality
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 1500; // 1.5 seconds delay between retries
+  
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  
+  let lastError: any;
+  
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      console.log(`Attempt ${attempt}/${MAX_RETRIES} to call OpenRouter API...`);
+      
+      const response = await axios.post<OpenRouterResponse>(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
+          model
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${effectiveApiKey}`,
+            "Content-Type": "application/json"
+          },
+          timeout: 60000 // 60 seconds timeout
         }
-      }
-    );
+      );
 
-    if (response.data.choices && response.data.choices.length > 0) {
-      return response.data.choices[0].message.content;
-    } else {
-      throw new Error("No response content from OpenRouter");
+      if (response.data.choices && response.data.choices.length > 0) {
+        console.log(`Successfully generated course content after ${attempt} attempt(s)`);
+        return response.data.choices[0].message.content;
+      } else {
+        throw new Error("No response content from OpenRouter");
+      }
+    } catch (error) {
+      lastError = error;
+      
+      if (attempt < MAX_RETRIES) {
+        console.log(`Attempt ${attempt} failed. Retrying in ${RETRY_DELAY/1000} seconds...`);
+        await sleep(RETRY_DELAY);
+      } else {
+        console.error("All retry attempts failed for OpenRouter API call:", error);
+        
+        if (axios.isAxiosError(error) && error.response) {
+          throw new Error(`OpenRouter API error (after ${MAX_RETRIES} retries): ${error.response.status} - ${error.response.data?.message || JSON.stringify(error.response.data)}`);
+        } else if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
+          throw new Error(`OpenRouter API timeout after ${MAX_RETRIES} retries. The request took too long to complete.`);
+        }
+        throw new Error(`Failed to generate course content after ${MAX_RETRIES} retries`);
+      }
     }
-  } catch (error) {
-    console.error("Error calling OpenRouter API:", error);
-    if (axios.isAxiosError(error) && error.response) {
-      throw new Error(`OpenRouter API error: ${error.response.status} - ${error.response.data.message || JSON.stringify(error.response.data)}`);
-    }
-    throw new Error("Failed to generate course content");
   }
+  
+  // This should not be reached, but TypeScript needs a return
+  throw lastError || new Error("Failed to generate course content");
 }
