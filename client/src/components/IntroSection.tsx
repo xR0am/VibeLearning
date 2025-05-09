@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 // Rotating keyword component with simple fade transition
 function RotatingKeyword() {
   const keywords = ["Tool", "Package", "Repo", "llms.txt"];
-  const colors = ["text-blue-500", "text-green-500", "text-purple-500", "text-amber-500"];
+  const colors = ["text-blue-400", "text-indigo-400", "text-purple-400", "text-blue-300"];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(false);
   
