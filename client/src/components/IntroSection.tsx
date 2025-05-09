@@ -2,50 +2,35 @@ import { Github, FileText, Sparkles, BarChart3, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 
-// Rotating keyword component with CSS animation
+// Simple rotating keyword component with fade transition
 function RotatingKeyword() {
-  // Use gradient-heading class to match the heading style
-  const keywords = [
-    { text: "Tool", color: "gradient-heading" },
-    { text: "Package", color: "gradient-heading" },
-    { text: "Repo", color: "gradient-heading" },
-    { text: "llms.txt", color: "gradient-heading" }
-  ];
-  
-  const [current, setCurrent] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const keywords = ["Tool", "Package", "Repo", "llms.txt"];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [fade, setFade] = useState(false);
   
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsAnimating(true);
+      // Start fade out
+      setFade(true);
       
-      // After animation completes, update the current word
+      // After fade out completes, change the word and fade back in
       setTimeout(() => {
-        setCurrent((prev) => (prev + 1) % keywords.length);
-        setIsAnimating(false);
-      }, 400);
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % keywords.length);
+        setFade(false);
+      }, 300);
       
     }, 3000);
     
     return () => clearInterval(interval);
-  }, [keywords.length]);
+  }, []);
   
   return (
-    <div className="inline-block relative overflow-hidden h-[1.2em] min-w-[180px]">
-      <div 
-        className={`${keywords[current].color} ${isAnimating ? 'slide-down' : ''}`}
-      >
-        {keywords[current].text}
-      </div>
-      
-      {isAnimating && (
-        <div 
-          className={`absolute top-0 left-0 ${keywords[(current + 1) % keywords.length].color} slide-up`}
-        >
-          {keywords[(current + 1) % keywords.length].text}
-        </div>
-      )}
-    </div>
+    <span 
+      className={`transition-opacity duration-300 ${fade ? 'opacity-0' : 'opacity-100'}`} 
+      style={{minWidth: '180px', display: 'inline-block', textAlign: 'left'}}
+    >
+      {keywords[currentIndex]}
+    </span>
   );
 }
 
@@ -63,7 +48,7 @@ export default function IntroSection() {
       </div>
       
       <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight gradient-heading leading-tight">
-        Learn Any Developer <span className="inline-block"><RotatingKeyword /></span>,<br />Your Way
+        Learn Any Developer <RotatingKeyword />,<br />Your Way
       </h1>
       
       <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
