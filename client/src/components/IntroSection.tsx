@@ -2,40 +2,26 @@ import { Github, FileText, Sparkles, BarChart3, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 
-// Improved rotating keyword component with clean fade transition
+// Basic reliable rotating keyword component with simple fade transition
 function RotatingKeyword() {
   const keywords = ["Tool", "Package", "Repo", "llms.txt"];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
   
   useEffect(() => {
     const interval = setInterval(() => {
-      // Start transition
-      setIsAnimating(true);
-      
-      // After fade completes, change word
-      setTimeout(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % keywords.length);
-        setIsAnimating(false);
-      }, 400);
-      
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % keywords.length);
     }, 3000);
     
     return () => clearInterval(interval);
   }, []);
   
   return (
-    <span className="inline-flex items-center">
-      <span 
-        className={`transition-all duration-400 ${
-          isAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
-        }`}
-        style={{ minWidth: '100px', display: 'inline-block' }}
-      >
+    <>
+      <span className="inline-block transition-opacity duration-300" style={{minWidth: '120px'}}>
         {keywords[currentIndex]}
       </span>
-      <span className="ml-1">,</span>
-    </span>
+      <span>,</span>
+    </>
   );
 }
 
