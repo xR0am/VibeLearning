@@ -66,6 +66,37 @@
     @apply shadow-md hover:shadow-lg dark:shadow-gray-800/20 dark:hover:shadow-gray-800/30 transition-shadow duration-200;
   }
   
+  /* Rotating keyword animation */
+  @keyframes slideUp {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideDown {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
+  
+  .slide-up {
+    animation: slideUp 0.5s forwards;
+  }
+  
+  .slide-down {
+    animation: slideDown 0.5s forwards;
+  }
+  
   .step-card {
     @apply bg-card border border-border rounded-lg p-6 card-shadow;
   }
