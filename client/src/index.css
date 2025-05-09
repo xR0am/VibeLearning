@@ -90,11 +90,11 @@
   }
   
   .slide-up {
-    animation: slideUp 0.5s forwards;
+    animation: slideUp 0.4s ease-out forwards;
   }
   
   .slide-down {
-    animation: slideDown 0.5s forwards;
+    animation: slideDown 0.4s ease-in forwards;
   }
   
   .step-card {

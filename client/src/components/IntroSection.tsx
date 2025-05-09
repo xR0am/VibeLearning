@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 
 // Rotating keyword component with CSS animation
 function RotatingKeyword() {
+  // Use gradient-heading class to match the heading style
   const keywords = [
-    { text: "Tool", color: "text-blue-400" },
-    { text: "Package", color: "text-indigo-400" },
-    { text: "Repo", color: "text-purple-400" },
-    { text: "llms.txt", color: "text-blue-300" }
+    { text: "Tool", color: "gradient-heading" },
+    { text: "Package", color: "gradient-heading" },
+    { text: "Repo", color: "gradient-heading" },
+    { text: "llms.txt", color: "gradient-heading" }
   ];
   
   const [current, setCurrent] = useState(0);
@@ -22,7 +23,7 @@ function RotatingKeyword() {
       setTimeout(() => {
         setCurrent((prev) => (prev + 1) % keywords.length);
         setIsAnimating(false);
-      }, 500);
+      }, 400);
       
     }, 3000);
     
@@ -30,7 +31,7 @@ function RotatingKeyword() {
   }, [keywords.length]);
   
   return (
-    <div className="inline-block relative overflow-hidden h-[1.2em] min-w-[110px] text-left">
+    <div className="inline-block relative overflow-hidden h-[1.2em] min-w-[180px]">
       <div 
         className={`${keywords[current].color} ${isAnimating ? 'slide-down' : ''}`}
       >
