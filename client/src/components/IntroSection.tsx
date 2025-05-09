@@ -2,54 +2,39 @@ import { Github, FileText, Sparkles, BarChart3, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 
-// Professional rotating keyword component with slide animation
+// Improved rotating keyword component with clean fade transition
 function RotatingKeyword() {
   const keywords = ["Tool", "Package", "Repo", "llms.txt"];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [prevIndex, setPrevIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   
   useEffect(() => {
     const interval = setInterval(() => {
-      setPrevIndex(currentIndex);
+      // Start transition
       setIsAnimating(true);
       
-      // After animation starts, calculate next word
-      const nextIndex = (currentIndex + 1) % keywords.length;
-      
-      // After animation completes, reset animation state
+      // After fade completes, change word
       setTimeout(() => {
-        setCurrentIndex(nextIndex);
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % keywords.length);
         setIsAnimating(false);
-      }, 600);
+      }, 400);
       
-    }, 3500);
+    }, 3000);
     
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, []);
   
   return (
-    <span className="relative inline-flex overflow-hidden align-bottom">
-      {/* Word container with relative positioning */}
-      <span className="relative inline-block overflow-hidden">
-        {/* Exiting word */}
-        {isAnimating && (
-          <span 
-            className="absolute inset-0 animate-word-exit" 
-            aria-hidden="true"
-          >
-            {keywords[prevIndex]}
-          </span>
-        )}
-        
-        {/* Current word (or entering word during animation) */}
-        <span 
-          className={isAnimating ? "animate-word-enter" : ""}
-        >
-          {keywords[currentIndex]}
-        </span>
+    <span className="inline-flex items-center">
+      <span 
+        className={`transition-all duration-400 ${
+          isAnimating ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
+        }`}
+        style={{ minWidth: '100px', display: 'inline-block' }}
+      >
+        {keywords[currentIndex]}
       </span>
-      <span className="ml-1 sm:ml-2">,</span> {/* Comma positioned outside animation */}
+      <span className="ml-1">,</span>
     </span>
   );
 }
