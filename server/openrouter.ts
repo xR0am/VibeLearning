@@ -24,7 +24,6 @@ interface OpenRouterResponse {
 export function getAvailableFreeModels(): { id: string, name: string }[] {
   return [
     { id: "deepseek/deepseek-chat-v3-0324:free", name: "DeepSeek Chat v3" },
-    { id: "deepseek/deepseek-r1:free", name: "DeepSeek R1" },
     { id: "meta-llama/llama-4-maverick:free", name: "Llama 4 Maverick" },
     { id: "google/gemini-1.5-pro", name: "Gemini 1.5 Pro" }
   ];

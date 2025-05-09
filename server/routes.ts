@@ -139,18 +139,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   ]
                 };
               } else {
-                // If the JSON is still not valid, attempt to create a minimal valid structure
+                // If the JSON is still not valid, attempt to create a more meaningful structure
+                const filename = sourceUrl.split('/').pop() || "";
+                const subjectMatter = sourceType === "llms-txt" ? "Using " + filename.replace(/\.txt$/, "") : "About " + filename;
+                
                 courseContent = {
-                  title: "Course on " + sourceUrl.split('/').pop(),
+                  title: `Guide to ${subjectMatter}`,
                   steps: []
                 };
               }
             }
           } else {
-            // If no JSON-like structure was found, create a minimal valid structure
+            // If no JSON-like structure was found, create a minimal valid structure with better title
             console.log("No JSON structure found, creating minimal valid course");
+            const filename = sourceUrl.split('/').pop() || "";
+            const subjectMatter = sourceType === "llms-txt" ? 
+              "Understanding " + filename.replace(/\.txt$/, "") : 
+              "Learning About " + filename;
+              
             courseContent = {
-              title: "Course on " + sourceUrl.split('/').pop(),
+              title: subjectMatter,
               steps: []
             };
           }
