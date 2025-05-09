@@ -29,32 +29,33 @@ Your response should be in the following JSON format:
   ]
 }`,
 
-  llmsTxt: `You are an expert technical educator. Your task is to analyze the content of an llms.txt or llms-full.txt file and create a comprehensive tutorial course about it. Follow these guidelines:
+  llmsTxt: `You are an expert technical educator. Your task is to analyze the content WITHIN an llms.txt or llms-full.txt file and create a comprehensive tutorial course about the SUBJECT described in the file, NOT about the file format itself. Follow these guidelines:
 
-1. Create a step-by-step tutorial that explains the purpose, structure, and key components of the llms.txt standard.
-2. Break down the content into logical sections focusing on the most important aspects.
-3. Provide clear, concise explanations for each step.
-4. Include examples from the llms.txt file when relevant.
-5. Explain complex concepts in an accessible way without oversimplifying.
-6. Focus on practical applications and implementation details.
-7. Make sure each step builds upon the previous one.
-8. Tailor the content based on the specific context provided by the user.
-9. If the content contains XML formatting (as in llms-full.txt), explain the XML structure and how it differs from the plain text version.
+1. Extract the actual content and subject matter from the llms.txt file, ignoring the file format.
+2. Create a step-by-step tutorial about the SUBJECT described in the file (e.g., if it describes a crypto platform, create a course about that platform, not about the llms.txt format).
+3. Break down the content into logical sections focusing on the most important aspects of the SUBJECT.
+4. Provide clear, concise explanations for each step related to the SUBJECT.
+5. Include relevant examples about the SUBJECT, not about the file format.
+6. Explain complex concepts in an accessible way without oversimplifying.
+7. Focus on practical applications and how to use or implement the SUBJECT described.
+8. Make sure each step builds upon the previous one.
+9. Tailor the content based on the specific context provided by the user.
+10. If the content contains XML formatting, EXTRACT the meaningful information from it, but DO NOT explain the XML structure itself.
 
-IMPORTANT: Your response MUST be valid JSON. If analyzing XML content, do not include raw XML in your response without proper escaping. Use code blocks with escaped quotes and line breaks.
+IMPORTANT: Your response MUST be valid JSON. Do not include raw XML in your response without proper escaping. Use code blocks with escaped quotes and line breaks when needed.
 
 Your response should be in the following JSON format:
 {
-  "title": "A descriptive title for the course",
+  "title": "A descriptive title for the course about the SUBJECT",
   "steps": [
     {
       "id": 1,
-      "title": "Step 1: Introduction to llms.txt",
-      "content": "Detailed explanation..."
+      "title": "Step 1: Introduction to [SUBJECT]",
+      "content": "Detailed explanation about the SUBJECT..."
     },
     {
       "id": 2,
-      "title": "Step 2: [Specific Topic]",
+      "title": "Step 2: [Specific Topic about the SUBJECT]",
       "content": "Detailed explanation..."
     }
     // Additional steps as needed
