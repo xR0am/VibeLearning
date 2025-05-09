@@ -79,10 +79,32 @@ export default {
             height: "0",
           },
         },
+        "word-enter": {
+          "0%": {
+            transform: "translateY(40%)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "translateY(0)",
+            opacity: "1",
+          },
+        },
+        "word-exit": {
+          "0%": {
+            transform: "translateY(0)",
+            opacity: "1",
+          },
+          "100%": {
+            transform: "translateY(-40%)",
+            opacity: "0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "word-enter": "word-enter 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+        "word-exit": "word-exit 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards",
       },
     },
   },

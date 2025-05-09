@@ -2,34 +2,54 @@ import { Github, FileText, Sparkles, BarChart3, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 
-// Simple rotating keyword component with fade transition
+// Professional rotating keyword component with slide animation
 function RotatingKeyword() {
   const keywords = ["Tool", "Package", "Repo", "llms.txt"];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [fade, setFade] = useState(false);
+  const [prevIndex, setPrevIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
   
   useEffect(() => {
     const interval = setInterval(() => {
-      // Start fade out
-      setFade(true);
+      setPrevIndex(currentIndex);
+      setIsAnimating(true);
       
-      // After fade out completes, change the word and fade back in
+      // After animation starts, calculate next word
+      const nextIndex = (currentIndex + 1) % keywords.length;
+      
+      // After animation completes, reset animation state
       setTimeout(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % keywords.length);
-        setFade(false);
-      }, 300);
+        setCurrentIndex(nextIndex);
+        setIsAnimating(false);
+      }, 600);
       
-    }, 3000);
+    }, 3500);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [currentIndex]);
   
   return (
-    <span 
-      className={`transition-opacity duration-300 ${fade ? 'opacity-0' : 'opacity-100'}`} 
-      style={{minWidth: '180px', display: 'inline-block', textAlign: 'left'}}
-    >
-      {keywords[currentIndex]}
+    <span className="relative inline-flex overflow-hidden align-bottom">
+      {/* Word container with relative positioning */}
+      <span className="relative inline-block overflow-hidden">
+        {/* Exiting word */}
+        {isAnimating && (
+          <span 
+            className="absolute inset-0 animate-word-exit" 
+            aria-hidden="true"
+          >
+            {keywords[prevIndex]}
+          </span>
+        )}
+        
+        {/* Current word (or entering word during animation) */}
+        <span 
+          className={isAnimating ? "animate-word-enter" : ""}
+        >
+          {keywords[currentIndex]}
+        </span>
+      </span>
+      <span className="ml-1 sm:ml-2">,</span> {/* Comma positioned outside animation */}
     </span>
   );
 }
@@ -48,7 +68,7 @@ export default function IntroSection() {
       </div>
       
       <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight gradient-heading leading-tight">
-        Learn Any Developer <RotatingKeyword />,<br />Your Way
+        Learn Any Developer <RotatingKeyword /><br />Your Way
       </h1>
       
       <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
