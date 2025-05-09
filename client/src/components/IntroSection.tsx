@@ -7,35 +7,31 @@ function RotatingKeyword() {
   const keywords = ["Tool", "Package", "Repo", "llms.txt"];
   const colors = ["text-blue-500", "text-green-500", "text-purple-500", "text-amber-500"];
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [previousIndex, setPreviousIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   
   useEffect(() => {
     const interval = setInterval(() => {
       setIsAnimating(true);
       setTimeout(() => {
-        setPreviousIndex(currentIndex);
         setCurrentIndex((prevIndex) => (prevIndex + 1) % keywords.length);
-        setIsAnimating(false);
-      }, 500); // Half a second for transition
+        setTimeout(() => {
+          setIsAnimating(false);
+        }, 50); // Quick reset after changing index
+      }, 500); // Half a second for fade out
     }, 3000); // Change every 3 seconds
     
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, []);
   
-  // Find the longest keyword to use as a placeholder
-  const longestKeyword = keywords.reduce(
-    (longest, current) => current.length > longest.length ? current : longest,
-    ""
-  );
+  // Placeholder with extra space to ensure no truncation
+  const placeholderText = "Package       ";
   
   return (
     <span className="relative inline-block overflow-hidden">
       {/* Current word - exits upward */}
       <span 
-        key={`current-${currentIndex}`}
         className={`
-          absolute inset-0 
+          absolute inset-0 left-0
           transition-all duration-500 ease-in-out
           ${colors[currentIndex]}
           ${isAnimating ? "transform -translate-y-8 opacity-0" : "transform translate-y-0 opacity-100"}
@@ -46,20 +42,19 @@ function RotatingKeyword() {
       
       {/* Next word - enters from below */}
       <span 
-        key={`next-${(currentIndex + 1) % keywords.length}`}
         className={`
-          absolute inset-0 
+          absolute inset-0 left-0
           transition-all duration-500 ease-in-out
           ${colors[(currentIndex + 1) % keywords.length]}
           ${isAnimating ? "transform translate-y-0 opacity-100" : "transform translate-y-8 opacity-0"}
         `}
-        style={{ transitionDelay: isAnimating ? '200ms' : '0ms' }}
+        style={{ transitionDelay: isAnimating ? '250ms' : '0ms' }}
       >
         {keywords[(currentIndex + 1) % keywords.length]}
       </span>
       
       {/* Invisible placeholder to maintain spacing */}
-      <span className="opacity-0 invisible">{longestKeyword}</span>
+      <span className="opacity-0 invisible">{placeholderText}</span>
     </span>
   );
 }
@@ -78,7 +73,7 @@ export default function IntroSection() {
       </div>
       
       <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight gradient-heading leading-tight">
-        Learn Any Developer <span className="inline-block min-w-[180px]"><RotatingKeyword /></span>,<br />Your Way
+        Learn Any Developer <span className="inline-block min-w-[220px] text-left"><RotatingKeyword /></span>,<br />Your Way
       </h1>
       
       <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
