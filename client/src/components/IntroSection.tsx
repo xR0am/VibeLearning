@@ -2,40 +2,75 @@ import { Github, FileText, Sparkles, BarChart3, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 
-// Rotating keyword component with simple fade transition
+// Rotating keyword component with vertical rotation (flip up) animation
 function RotatingKeyword() {
   const keywords = ["Tool", "Package", "Repo", "llms.txt"];
   const colors = ["text-blue-400", "text-indigo-400", "text-purple-400", "text-blue-300"];
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [fade, setFade] = useState(false);
+  const [items, setItems] = useState(keywords.map((text, i) => ({
+    text,
+    color: colors[i],
+    state: i === 0 ? "visible" : "hidden",
+    key: `item-${i}`
+  })));
   
   useEffect(() => {
-    const interval = setInterval(() => {
-      // First fade out
-      setFade(true);
+    const rotationInterval = setInterval(() => {
+      setItems(prevItems => {
+        // Find current visible item
+        const visibleIndex = prevItems.findIndex(item => item.state === "visible");
+        // Calculate next index
+        const nextIndex = (visibleIndex + 1) % prevItems.length;
+        
+        // Create a new array with updated states
+        return prevItems.map((item, i) => {
+          if (i === visibleIndex) {
+            return { ...item, state: "leaving" };
+          } else if (i === nextIndex) {
+            return { ...item, state: "entering" };
+          } else {
+            return { ...item, state: "hidden" };
+          }
+        });
+      });
       
-      // Then change the word
+      // After animation completes, reset states for the next cycle
       setTimeout(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % keywords.length);
-        setFade(false);
-      }, 400);
+        setItems(prevItems => {
+          return prevItems.map(item => ({
+            ...item,
+            state: item.state === "entering" ? "visible" : 
+                  item.state === "leaving" ? "hidden" : item.state
+          }));
+        });
+      }, 500); // Match this to the CSS animation duration
       
     }, 3000); // Change every 3 seconds
     
-    return () => clearInterval(interval);
+    return () => clearInterval(rotationInterval);
   }, []);
   
   return (
-    <span 
-      className={`
-        inline-block 
-        transition-all duration-300 ease-in-out
-        ${colors[currentIndex]}
-        ${fade ? 'opacity-0' : 'opacity-100'}
-      `}
-    >
-      {keywords[currentIndex]}
-    </span>
+    <div className="relative inline-block h-[1.2em] overflow-hidden">
+      {items.map(item => (
+        <div
+          key={item.key}
+          className={`
+            absolute inset-0 w-full text-left
+            transition-all duration-300 ease-in-out
+            ${item.color}
+            ${item.state === "leaving" ? "-translate-y-full opacity-0" : 
+              item.state === "entering" ? "translate-y-0 opacity-100" : 
+              item.state === "visible" ? "translate-y-0 opacity-100" : 
+              "translate-y-full opacity-0"}
+          `}
+          style={{
+            transitionDelay: item.state === "entering" ? "120ms" : "0ms"
+          }}
+        >
+          {item.text}
+        </div>
+      ))}
+    </div>
   );
 }
 
