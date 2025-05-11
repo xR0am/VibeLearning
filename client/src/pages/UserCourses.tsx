@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -189,7 +190,12 @@ export default function UserCourses() {
                             steps: parsedSteps
                           };
                           setSelectedCourse(courseContent);
-                          window.location.href = `/course/${course.id}`;
+                          
+                          // Store course ID in sessionStorage for persistence
+                          sessionStorage.setItem('current_course_id', String(course.id));
+                          
+                          // Use router navigation instead of direct browser navigation
+                          setLocation(`/course/${course.id}`);
                         }}
                       >
                         View Course

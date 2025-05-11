@@ -108,7 +108,9 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
         data.complexity = computeCourseComplexity(data);
       }
       
+      // Pass the generated course data to parent component
       onCourseGenerated(data, sourceType);
+      
       toast({
         title: "Course generated successfully!",
         description: `Your custom course for ${data.repoUrl} has been created.`,
@@ -126,6 +128,11 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
           queryClient.invalidateQueries({ queryKey: ["/api/courses/public"] });
         }
       }
+      
+      // Store the course data in session storage for navigation history to work properly
+      // The course ID will be assigned by the server and included in the database response
+      // We don't need to check for the ID here as we're not directly navigating to it
+      sessionStorage.setItem('last_generated_course', JSON.stringify(data));
     },
     onError: (error) => {
       toast({
