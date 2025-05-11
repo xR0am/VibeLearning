@@ -96,7 +96,13 @@ export default function Course() {
   }, [course]);
   
   const handleBackToHome = () => {
-    setLocation("/");
+    // Use browser's back button functionality instead of direct navigation
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // Fallback to direct navigation if there's no history
+      setLocation("/");
+    }
     
     // Scroll to top
     window.scrollTo({

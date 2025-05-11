@@ -30,6 +30,7 @@ export default function UserCourses() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [selectedCourse, setSelectedCourse] = useState<CourseContent | null>(null);
   const [courseToDelete, setCourseToDelete] = useState<number | null>(null);
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -103,7 +104,7 @@ export default function UserCourses() {
                 <p className="text-muted-foreground mb-4">
                   You haven't created any courses yet. Generate your first course by analyzing a GitHub repository.
                 </p>
-                <Button onClick={() => window.location.href = "/"}>
+                <Button onClick={() => setLocation("/")}>
                   Create Your First Course
                 </Button>
               </CardContent>

@@ -74,7 +74,7 @@ export default function PublicCourses() {
                     ? "No courses match your search criteria. Try different keywords."
                     : "There are no public courses available yet. Be the first to share a course!"}
                 </p>
-                <Button onClick={() => window.location.href = "/"}>
+                <Button onClick={() => setLocation("/")}>
                   Create a Course
                 </Button>
               </CardContent>
