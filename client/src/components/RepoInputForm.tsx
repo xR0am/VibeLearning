@@ -156,6 +156,14 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
       return;
     }
     
+    // Show generating state immediately
+    onCourseGenerated({
+      title: "Generating...",
+      repoUrl: data.sourceUrl,
+      context: data.context,
+      steps: []
+    }, sourceType);
+    
     // Validate URL based on source type
     const isUrlValid = validateUrl(data.sourceUrl, data.sourceType);
     if (!isUrlValid) {
@@ -330,7 +338,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
                                 {models.map((model) => (
                                   <CommandItem
                                     key={model.id}
-                                    value={`${model.name} ${model.id}`}
+                                    value={model.name}
                                     onSelect={() => {
                                       field.onChange(model.id);
                                       setModelComboboxOpen(false);

@@ -5,7 +5,7 @@ import IntroSection from "@/components/IntroSection";
 import RepoInputForm from "@/components/RepoInputForm";
 import CourseContent from "@/components/CourseContent";
 import PublicCourseLibrary from "@/components/PublicCourseLibrary";
-import CourseGenerationProgress from "@/components/CourseGenerationProgress";
+
 import HowItWorks from "@/components/HowItWorks";
 import Footer from "@/components/Footer";
 import { CourseContent as CourseContentType, SourceType } from "@/types";
@@ -30,6 +30,21 @@ export default function Home() {
 
   const handleCourseSelect = (course: CourseContentType, sourceType: SourceType) => {
     setCurrentSourceType(sourceType);
+    
+    // If the course has empty steps, it means we're starting generation
+    if (course.steps.length === 0) {
+      setIsGenerating(true);
+      setView('generating');
+      
+      // Scroll to top
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      return;
+    }
+    
+    // If course has steps, the generation is complete
     setIsGenerating(false);
     setCourseContent(course);
     setView('course');
@@ -66,19 +81,11 @@ export default function Home() {
             exit={{ opacity: 0 }}
             className="flex-grow flex items-center justify-center py-20"
           >
-            <CourseGenerationProgress 
-              sourceType={currentSourceType}
-              onComplete={() => {
-                if (courseContent) {
-                  setView('course');
-                  // Scroll to top
-                  window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                  });
-                }
-              }}
-            />
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <h2 className="text-xl font-semibold mb-2">Generating Course</h2>
+              <p className="text-muted-foreground">This may take a few moments...</p>
+            </div>
           </motion.div>
         ) : view === 'home' ? (
           <motion.main 
