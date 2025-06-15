@@ -13,21 +13,49 @@ function extractContentFromXML(xmlContent: string): string {
     // Extract text content from common XML tags while preserving structure
     const extractedSections: string[] = [];
     
-    // Common patterns in llms.txt XML files
+    // Extract project title and summary from attributes first
+    const projectMatch = cleanContent.match(/<project[^>]*title="([^"]*)"[^>]*summary="([^"]*)"[^>]*>/i);
+    if (projectMatch) {
+      extractedSections.push(`Project Title: ${projectMatch[1]}`);
+      extractedSections.push(`Summary: ${projectMatch[2]}`);
+    }
+    
+    // Extract main project description (text content inside project tag but outside docs)
+    const projectContentMatch = cleanContent.match(/<project[^>]*>([\s\S]*?)<docs>/i);
+    if (projectContentMatch) {
+      const projectDesc = projectContentMatch[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (projectDesc && projectDesc.length > 10) {
+        extractedSections.push(`Description:\n${projectDesc}`);
+      }
+    }
+    
+    // Extract individual documentation sections
+    const docMatches = cleanContent.match(/<doc[^>]*title="([^"]*)"[^>]*desc="([^"]*)"[^>]*>([\s\S]*?)<\/doc>/gi);
+    if (docMatches) {
+      extractedSections.push(`\nDocumentation Sections:`);
+      docMatches.forEach((match, index) => {
+        const titleMatch = match.match(/title="([^"]*)"/i);
+        const descMatch = match.match(/desc="([^"]*)"/i);
+        const contentMatch = match.match(/<doc[^>]*>([\s\S]*?)<\/doc>/i);
+        
+        if (titleMatch && descMatch && contentMatch) {
+          const title = titleMatch[1];
+          const desc = descMatch[1];
+          const content = contentMatch[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+          
+          extractedSections.push(`\n${index + 1}. ${title}:\n   ${desc}\n   ${content.substring(0, 300)}${content.length > 300 ? '...' : ''}`);
+        }
+      });
+    }
+    
+    // Common patterns in llms.txt XML files as fallback
     const patterns = [
-      { tag: 'title', label: 'Title' },
-      { tag: 'description', label: 'Description' },
-      { tag: 'summary', label: 'Summary' },
-      { tag: 'overview', label: 'Overview' },
       { tag: 'features', label: 'Features' },
       { tag: 'capabilities', label: 'Capabilities' },
       { tag: 'usage', label: 'Usage' },
       { tag: 'instructions', label: 'Instructions' },
       { tag: 'examples', label: 'Examples' },
-      { tag: 'api', label: 'API Information' },
-      { tag: 'endpoints', label: 'Endpoints' },
-      { tag: 'parameters', label: 'Parameters' },
-      { tag: 'documentation', label: 'Documentation' }
+      { tag: 'api', label: 'API Information' }
     ];
     
     patterns.forEach(({ tag, label }) => {
