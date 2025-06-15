@@ -21,12 +21,81 @@ interface OpenRouterResponse {
   }[];
 }
 
-export function getAvailableFreeModels(): { id: string, name: string }[] {
+// Cache for models to avoid excessive API calls
+let cachedModels: { id: string, name: string }[] = [];
+let lastFetchTime = 0;
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// Interface for OpenRouter model response
+interface OpenRouterModel {
+  id: string;
+  name: string;
+  description?: string;
+  context_length?: number;
+  pricing?: {
+    prompt: string;
+    completion: string;
+  };
+}
+
+export async function getAllAvailableModels(): Promise<{ id: string, name: string }[]> {
+  const now = Date.now();
+  
+  // Return cached models if they're still fresh
+  if (cachedModels.length > 0 && (now - lastFetchTime) < CACHE_DURATION) {
+    return cachedModels;
+  }
+  
+  try {
+    const response = await axios.get('https://openrouter.ai/api/v1/models', {
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+    
+    if (response.data && response.data.data) {
+      // Transform the response to our expected format
+      const models: { id: string, name: string }[] = response.data.data.map((model: OpenRouterModel) => ({
+        id: model.id,
+        name: model.name
+      }));
+      
+      // Sort models alphabetically by name
+      models.sort((a, b) => a.name.localeCompare(b.name));
+      
+      // Update cache
+      cachedModels = models;
+      lastFetchTime = now;
+      
+      return models;
+    }
+  } catch (error) {
+    console.error('Failed to fetch models from OpenRouter:', error);
+    
+    // If we have cached models, return them even if they're stale
+    if (cachedModels.length > 0) {
+      return cachedModels;
+    }
+  }
+  
+  // Fallback to a basic set of known working models if API fails
+  return getDefaultModels();
+}
+
+export function getDefaultModels(): { id: string, name: string }[] {
   return [
     { id: "deepseek/deepseek-chat-v3-0324:free", name: "DeepSeek Chat v3" },
     { id: "meta-llama/llama-4-maverick:free", name: "Llama 4 Maverick" },
-    { id: "google/gemini-2.5-pro-exp-03-25", name: "Gemini 2.5 Pro" }
+    { id: "google/gemini-2.5-pro-exp-03-25", name: "Gemini 2.5 Pro" },
+    { id: "anthropic/claude-3-5-sonnet", name: "Claude 3.5 Sonnet" },
+    { id: "openai/gpt-4o", name: "GPT-4o" },
+    { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" }
   ];
+}
+
+// Legacy function for backward compatibility - now returns all models
+export function getAvailableFreeModels(): { id: string, name: string }[] {
+  return getDefaultModels();
 }
 
 export async function generateCourseWithOpenRouter(

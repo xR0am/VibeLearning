@@ -288,7 +288,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
                         <SelectTrigger>
                           <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a model"} />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-[200px]">
                           {isLoadingModels ? (
                             <div className="flex items-center justify-center py-2">
                               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -299,10 +299,16 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
                               <SelectItem 
                                 key={model.id} 
                                 value={model.id}
-                                className="flex items-center gap-2"
+                                className="cursor-pointer"
                               >
-                                <Bot className="h-4 w-4 text-blue-500" />
-                                <span>{model.name}</span>
+                                <div className="flex items-center justify-between w-full">
+                                  <span className="truncate">{model.name}</span>
+                                  {model.id.includes(':free') && (
+                                    <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
+                                      FREE
+                                    </span>
+                                  )}
+                                </div>
                               </SelectItem>
                             ))
                           ) : (
@@ -317,15 +323,18 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
                       {!isAuthenticated ? (
                         <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
                           <Bot className="h-3.5 w-3.5" />
-                          Log in and add your OpenRouter API key to use more models
+                          Log in and add your OpenRouter API key to access all available models
                         </span>
                       ) : !user?.openrouterApiKey ? (
                         <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
                           <Bot className="h-3.5 w-3.5" />
-                          Add your OpenRouter API key in profile settings to use more models
+                          Add your OpenRouter API key in profile settings to access all available models
                         </span>
                       ) : (
-                        "Using available models from your OpenRouter account"
+                        <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                          <Bot className="h-3.5 w-3.5" />
+                          Access to all OpenRouter models (100+ models available)
+                        </span>
                       )}
                     </FormDescription>
                     <FormMessage />

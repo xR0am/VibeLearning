@@ -5,7 +5,7 @@ import { z } from "zod";
 import { generateCourseRequestSchema, courseContentSchema } from "@shared/schema";
 import { fetchRepositoryInfo } from "./github";
 import { fetchLlmsTxtContent } from "./llms-txt";
-import { generateCourseWithOpenRouter, getAvailableFreeModels } from "./openrouter";
+import { generateCourseWithOpenRouter, getAvailableFreeModels, getAllAvailableModels } from "./openrouter";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   getAllSystemPrompts, 
@@ -48,10 +48,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get available free OpenRouter models
+  // Get all available OpenRouter models
   app.get("/api/models", async (req, res) => {
     try {
-      const models = getAvailableFreeModels();
+      const models = await getAllAvailableModels();
       res.json(models);
     } catch (error) {
       console.error("Error fetching models:", error);
