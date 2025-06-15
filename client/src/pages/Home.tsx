@@ -55,6 +55,18 @@ export default function Home() {
       behavior: 'smooth'
     });
   };
+
+  const handleGenerationError = () => {
+    // Reset to home view when generation fails
+    setIsGenerating(false);
+    setView('home');
+    
+    // Scroll to top
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
   
   const handleBackToHome = () => {
     setCourseContent(null);
@@ -98,7 +110,7 @@ export default function Home() {
             <IntroSection />
             
             <div className="mb-8">
-              <RepoInputForm onCourseGenerated={handleCourseSelect} />
+              <RepoInputForm onCourseGenerated={handleCourseSelect} onError={handleGenerationError} />
             </div>
             
             <PublicCourseLibrary />

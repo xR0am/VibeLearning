@@ -75,9 +75,10 @@ type FormData = z.infer<typeof formSchema>;
 
 interface RepoInputFormProps {
   onCourseGenerated: (course: CourseContent, sourceType: SourceType) => void;
+  onError?: () => void;
 }
 
-export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps) {
+export default function RepoInputForm({ onCourseGenerated, onError }: RepoInputFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [sourceType, setSourceType] = useState<SourceType>("github");
@@ -171,6 +172,9 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
           });
         }, 1000);
       }
+
+      // Call onError callback to reset UI state
+      onError?.();
     },
   });
   
