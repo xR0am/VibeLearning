@@ -105,15 +105,6 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
-      // Immediately notify parent component that generation has started
-      // This lets the progress animation show immediately
-      onCourseGenerated({
-        title: "Generating...",
-        repoUrl: data.sourceUrl,
-        context: data.context,
-        steps: []
-      }, sourceType);
-      
       const response = await apiRequest("POST", "/api/courses/generate", data);
       return response.json();
     },

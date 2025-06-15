@@ -182,16 +182,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!courseContent.steps || !Array.isArray(courseContent.steps)) {
           console.log("No steps array found, creating empty steps array");
           courseContent.steps = [];
+        } else {
+          console.log(`Found ${courseContent.steps.length} steps in course content`);
+          
+          // Ensure steps array contains valid objects with required properties
+          courseContent.steps = courseContent.steps.map((step: any, index: number) => {
+            return {
+              id: step.id || index + 1,
+              title: step.title || `Step ${index + 1}`,
+              content: step.content || 'No content available for this step.'
+            };
+          });
         }
-        
-        // Ensure steps array contains valid objects with required properties
-        courseContent.steps = courseContent.steps.map((step: any, index: number) => {
-          return {
-            id: step.id || index + 1,
-            title: step.title || `Step ${index + 1}`,
-            content: step.content || 'No content available for this step.'
-          };
-        });
         
         // Variable to hold our validated/normalized content
         let courseStructure;

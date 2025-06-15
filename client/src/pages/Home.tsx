@@ -30,23 +30,9 @@ export default function Home() {
 
   const handleCourseSelect = (course: CourseContentType, sourceType: SourceType) => {
     setCurrentSourceType(sourceType);
-    
-    // If the course has empty steps, it means we're starting generation
-    if (course.steps.length === 0) {
-      setIsGenerating(true);
-      setView('generating');
-      
-      // Scroll to top
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-      return;
-    }
-    
-    // If course has steps, the generation is complete
     setIsGenerating(false);
     setCourseContent(course);
+    setView('course');
     
     // Scroll to top
     window.scrollTo({
