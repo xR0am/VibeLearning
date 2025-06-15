@@ -332,7 +332,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
                         <PopoverContent className="w-[400px] p-0" align="start">
                           <Command>
                             <CommandInput placeholder="Search models..." className="h-9" />
-                            <CommandList className="max-h-[200px]">
+                            <CommandList className="max-h-[300px] overflow-y-auto">
                               <CommandEmpty>No models found.</CommandEmpty>
                               <CommandGroup>
                                 {models.map((model) => (

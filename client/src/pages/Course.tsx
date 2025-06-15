@@ -104,11 +104,15 @@ export default function Course() {
   }, [course]);
   
   const handleBackToHome = () => {
-    // Use browser's back button functionality instead of direct navigation
-    if (window.history.length > 1) {
+    // Check if we came from the same domain (internal navigation)
+    const referrer = document.referrer;
+    const currentDomain = window.location.origin;
+    
+    // If there's history and we came from the same domain, use browser back
+    if (window.history.length > 1 && referrer.startsWith(currentDomain)) {
       window.history.back();
     } else {
-      // Fallback to direct navigation if there's no history
+      // Otherwise navigate to home page
       setLocation("/");
     }
     
