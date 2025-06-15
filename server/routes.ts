@@ -514,6 +514,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Progress tracking routes
+  app.get("/api/progress/:courseId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const courseId = parseInt(req.params.courseId);
+      
+      const progress = await storage.getUserProgress(userId, courseId);
+      if (!progress) {
+        return res.status(404).json({ message: "Progress not found" });
+      }
+      
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching progress:", error);
+      res.status(500).json({ message: "Failed to fetch progress" });
+    }
+  });
+
+  app.post("/api/progress/:courseId/step/:stepId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const courseId = parseInt(req.params.courseId);
+      const stepId = parseInt(req.params.stepId);
+      
+      const progress = await storage.markStepComplete(userId, courseId, stepId);
+      
+      // Check for new achievements
+      const newAchievements = await storage.checkAndAwardAchievements(userId);
+      
+      res.json({ progress, newAchievements });
+    } catch (error) {
+      console.error("Error marking step complete:", error);
+      res.status(500).json({ message: "Failed to mark step complete" });
+    }
+  });
+
+  app.get("/api/dashboard", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      const [progressList, userAchievements] = await Promise.all([
+        storage.getUserProgressList(userId),
+        storage.getUserAchievements(userId)
+      ]);
+      
+      // Get course details for each progress
+      const progressWithCourses = await Promise.all(
+        progressList.map(async (progress) => {
+          const course = await storage.getCourse(progress.courseId);
+          return { ...progress, course };
+        })
+      );
+      
+      res.json({
+        progress: progressWithCourses,
+        achievements: userAchievements,
+        stats: {
+          totalCourses: progressList.length,
+          completedCourses: progressList.filter(p => p.completionPercentage === 100).length,
+          totalTimeSpent: progressList.reduce((sum, p) => sum + (p.timeSpentMinutes || 0), 0),
+          currentStreak: Math.max(...progressList.map(p => p.streakDays || 0), 0)
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard" });
+    }
+  });
+
+  app.get("/api/achievements", async (req, res) => {
+    try {
+      const achievements = await storage.getAchievements();
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
   
   const httpServer = createServer(app);
   return httpServer;

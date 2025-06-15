@@ -249,7 +249,11 @@ export class DatabaseStorage implements IStorage {
   async createUserProgress(progress: InsertUserProgress): Promise<UserProgress> {
     const [newProgress] = await db
       .insert(userProgress)
-      .values(progress)
+      .values({
+        ...progress,
+        completedSteps: progress.completedSteps || [],
+        timeSpentMinutes: progress.timeSpentMinutes || 0
+      })
       .returning();
     return newProgress;
   }
@@ -288,14 +292,13 @@ export class DatabaseStorage implements IStorage {
         completedSteps: [stepId],
         currentStepId: stepId + 1,
         totalSteps,
-        completionPercentage: Math.round((1 / totalSteps) * 100),
-        timeSpentMinutes: 0
+        completionPercentage: Math.round((1 / totalSteps) * 100)
       });
     }
 
     // Update existing progress
     const completedSteps = currentProgress.completedSteps || [];
-    const newCompletedSteps = [...new Set([...completedSteps, stepId])]; // Remove duplicates
+    const newCompletedSteps = Array.from(new Set([...completedSteps, stepId])); // Remove duplicates
     const completionPercentage = Math.round((newCompletedSteps.length / currentProgress.totalSteps) * 100);
     const isCompleted = newCompletedSteps.length === currentProgress.totalSteps;
 
@@ -334,7 +337,11 @@ export class DatabaseStorage implements IStorage {
   async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
     const [newAchievement] = await db
       .insert(achievements)
-      .values(achievement)
+      .values({
+        ...achievement,
+        iconColor: achievement.iconColor || "#3b82f6",
+        isActive: achievement.isActive !== undefined ? achievement.isActive : true
+      })
       .returning();
     return newAchievement;
   }
