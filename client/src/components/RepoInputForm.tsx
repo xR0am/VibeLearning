@@ -141,11 +141,36 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
       sessionStorage.setItem('last_generated_course', JSON.stringify(data));
     },
     onError: (error) => {
+      let errorInfo;
+      try {
+        // Try to parse structured error from server
+        errorInfo = JSON.parse(error.message);
+      } catch {
+        // Fallback to plain error message
+        errorInfo = {
+          type: 'unknown_error',
+          message: error instanceof Error ? error.message : "Unknown error occurred",
+          suggestions: ['Try again with a different model']
+        };
+      }
+
+      // Show main error message
       toast({
         title: "Failed to generate course",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        description: errorInfo.message,
         variant: "destructive",
       });
+
+      // Show suggestions if available
+      if (errorInfo.suggestions && errorInfo.suggestions.length > 0) {
+        setTimeout(() => {
+          toast({
+            title: "Suggestions to fix this:",
+            description: errorInfo.suggestions.join(' • '),
+            duration: 8000,
+          });
+        }, 1000);
+      }
     },
   });
   

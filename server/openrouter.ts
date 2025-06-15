@@ -171,11 +171,63 @@ Please create a custom learning course based on this ${sourceType === "github" ?
         console.error("All retry attempts failed for OpenRouter API call:", error);
         
         if (axios.isAxiosError(error) && error.response) {
-          throw new Error(`OpenRouter API error (after ${MAX_RETRIES} retries): ${error.response.status} - ${error.response.data?.message || JSON.stringify(error.response.data)}`);
+          const errorData = error.response.data;
+          const errorMessage = errorData?.error?.message || errorData?.message || JSON.stringify(errorData);
+          
+          // Create a structured error with suggestions
+          let suggestions: string[] = [];
+          
+          // Handle specific error types with suggestions
+          if (errorMessage.includes('maximum context length') || errorMessage.includes('context length')) {
+            suggestions = [
+              'Try a model with larger context window like Claude 3.5 Sonnet or GPT-4 Turbo',
+              'Use a smaller repository or provide more specific context',
+              'Break down your request into smaller parts'
+            ];
+          } else if (errorMessage.includes('rate limit') || errorMessage.includes('quota')) {
+            suggestions = [
+              'Try a different model that may have higher rate limits',
+              'Wait a few minutes before trying again',
+              'Consider using a free model if available'
+            ];
+          } else if (errorMessage.includes('unauthorized') || errorMessage.includes('authentication')) {
+            suggestions = [
+              'Check if your API key is valid and has sufficient credits',
+              'Try logging out and back in to refresh your session'
+            ];
+          }
+          
+          const structuredError = {
+            type: 'api_error',
+            status: error.response.status,
+            message: errorMessage,
+            suggestions
+          };
+          
+          throw new Error(JSON.stringify(structuredError));
         } else if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
-          throw new Error(`OpenRouter API timeout after ${MAX_RETRIES} retries. The request took too long to complete.`);
+          const timeoutError = {
+            type: 'timeout_error',
+            message: 'Request timed out after multiple attempts',
+            suggestions: [
+              'Try a faster model for quicker responses',
+              'Reduce the size of your input content',
+              'Check your internet connection'
+            ]
+          };
+          throw new Error(JSON.stringify(timeoutError));
         }
-        throw new Error(`Failed to generate course content after ${MAX_RETRIES} retries`);
+        
+        const genericError = {
+          type: 'unknown_error',
+          message: 'Failed to generate course content',
+          suggestions: [
+            'Try a different model',
+            'Check your internet connection',
+            'Try again in a few minutes'
+          ]
+        };
+        throw new Error(JSON.stringify(genericError));
       }
     }
   }
