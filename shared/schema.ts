@@ -146,3 +146,69 @@ export type CourseWithTags = typeof courses.$inferSelect & {
   modelUsed: string;
   complexity?: string;
 };
+
+// User Progress Tracking for Gamification
+export const userProgress = pgTable("user_progress", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  courseId: integer("course_id").notNull().references(() => courses.id, { onDelete: "cascade" }),
+  completedSteps: jsonb("completed_steps").$type<number[]>().default([]), // Array of completed step IDs
+  currentStepId: integer("current_step_id").default(1), // Current step user is on
+  totalSteps: integer("total_steps").notNull().default(0), // Total steps in the course
+  completionPercentage: integer("completion_percentage").default(0), // 0-100
+  startedAt: timestamp("started_at").defaultNow(),
+  lastActivityAt: timestamp("last_activity_at").defaultNow(),
+  completedAt: timestamp("completed_at"), // Null if not completed
+  streakDays: integer("streak_days").default(0), // Learning streak
+  timeSpentMinutes: integer("time_spent_minutes").default(0), // Time spent on course
+});
+
+export const insertUserProgressSchema = createInsertSchema(userProgress).omit({
+  id: true,
+  startedAt: true,
+  lastActivityAt: true,
+});
+
+export type InsertUserProgress = z.infer<typeof insertUserProgressSchema>;
+export type UserProgress = typeof userProgress.$inferSelect;
+
+// Learning Achievements/Badges
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  iconName: text("icon_name").notNull(), // Lucide icon name
+  iconColor: text("icon_color").default("#3b82f6"), // Hex color
+  criteria: jsonb("criteria").$type<{
+    type: "course_completion" | "streak" | "time_spent" | "courses_count";
+    value: number;
+  }>().notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+
+// User Achievements (earned badges)
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  achievementId: integer("achievement_id").notNull().references(() => achievements.id, { onDelete: "cascade" }),
+  earnedAt: timestamp("earned_at").defaultNow(),
+}, (table) => ({
+  userAchievementIdx: index("user_achievement_idx").on(table.userId, table.achievementId),
+}));
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  earnedAt: true,
+});
+
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;

@@ -2,7 +2,10 @@ import {
   users, 
   courses, 
   tags, 
-  courseTags, 
+  courseTags,
+  userProgress,
+  achievements,
+  userAchievements,
   type User, 
   type UpsertUser,
   type InsertUser, 
@@ -11,7 +14,13 @@ import {
   type CourseContent, 
   type Tag,
   type InsertTag,
-  type InsertCourseTag
+  type InsertCourseTag,
+  type UserProgress,
+  type InsertUserProgress,
+  type Achievement,
+  type InsertAchievement,
+  type UserAchievement,
+  type InsertUserAchievement
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -39,6 +48,20 @@ export interface IStorage {
   getTagByName(name: string): Promise<Tag | undefined>;
   getCourseWithTags(courseId: number): Promise<{ course: Course, tags: string[] }>;
   addTagToCourse(courseId: number, tagName: string): Promise<void>;
+  
+  // Progress tracking methods
+  getUserProgress(userId: string, courseId: number): Promise<UserProgress | undefined>;
+  createUserProgress(progress: InsertUserProgress): Promise<UserProgress>;
+  updateUserProgress(userId: string, courseId: number, updates: Partial<UserProgress>): Promise<UserProgress>;
+  getUserProgressList(userId: string): Promise<UserProgress[]>;
+  markStepComplete(userId: string, courseId: number, stepId: number): Promise<UserProgress>;
+  
+  // Achievement methods
+  getAchievements(): Promise<Achievement[]>;
+  getUserAchievements(userId: string): Promise<(UserAchievement & { achievement: Achievement })[]>;
+  createAchievement(achievement: InsertAchievement): Promise<Achievement>;
+  awardAchievement(userId: string, achievementId: number): Promise<UserAchievement>;
+  checkAndAwardAchievements(userId: string): Promise<UserAchievement[]>;
 }
 
 export class DatabaseStorage implements IStorage {
