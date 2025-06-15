@@ -33,7 +33,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Github, FileText, Loader2, Sparkles, Bot, Globe, Lock } from "lucide-react";
+import { Github, FileText, Loader2, Sparkles, Bot, Globe, Lock, Check, ChevronsUpDown } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 // Custom validator function for URL validation
@@ -70,6 +84,7 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
   const { user, isAuthenticated } = useAuth();
   const { models, isLoading: isLoadingModels } = useModels();
   const [isApiKeyPromptOpen, setIsApiKeyPromptOpen] = useState(false);
+  const [modelComboboxOpen, setModelComboboxOpen] = useState(false);
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -284,40 +299,73 @@ export default function RepoInputForm({ onCourseGenerated }: RepoInputFormProps)
                   <FormItem>
                     <FormLabel>Select OpenRouter LLM</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select a model"} />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[200px]">
-                          {isLoadingModels ? (
-                            <div className="flex items-center justify-center py-2">
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              <span>Loading models...</span>
-                            </div>
-                          ) : models.length > 0 ? (
-                            models.map((model) => (
-                              <SelectItem 
-                                key={model.id} 
-                                value={model.id}
-                                className="cursor-pointer"
-                              >
-                                <div className="flex items-center justify-between w-full">
-                                  <span className="truncate">{model.name}</span>
-                                  {model.id.includes(':free') && (
-                                    <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
-                                      FREE
-                                    </span>
-                                  )}
-                                </div>
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="deepseek/deepseek-chat-v3-0324:free">
-                              DeepSeek Chat v3 (Free)
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <Popover open={modelComboboxOpen} onOpenChange={setModelComboboxOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={modelComboboxOpen}
+                            className="w-full justify-between"
+                            disabled={isLoadingModels}
+                          >
+                            {isLoadingModels ? (
+                              <div className="flex items-center">
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Loading models...
+                              </div>
+                            ) : field.value ? (
+                              <div className="flex items-center justify-between w-full">
+                                <span className="truncate">
+                                  {models.find((model) => model.id === field.value)?.name || field.value}
+                                </span>
+                                {field.value.includes(':free') && (
+                                  <span className="text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
+                                    FREE
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              "Select a model..."
+                            )}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[400px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search models..." className="h-9" />
+                            <CommandList className="max-h-[200px]">
+                              <CommandEmpty>No models found.</CommandEmpty>
+                              <CommandGroup>
+                                {models.map((model) => (
+                                  <CommandItem
+                                    key={model.id}
+                                    value={`${model.name} ${model.id}`}
+                                    onSelect={() => {
+                                      field.onChange(model.id);
+                                      setModelComboboxOpen(false);
+                                    }}
+                                  >
+                                    <div className="flex items-center justify-between w-full">
+                                      <span className="truncate">{model.name}</span>
+                                      {model.id.includes(':free') && (
+                                        <span className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
+                                          FREE
+                                        </span>
+                                      )}
+                                    </div>
+                                    <Check
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        field.value === model.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </FormControl>
                     <FormDescription>
                       {!isAuthenticated ? (
