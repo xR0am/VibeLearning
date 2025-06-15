@@ -4,20 +4,28 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CourseContent from "@/components/CourseContent";
+import GamefiedStepTracker from "@/components/GamefiedStepTracker";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CodeLoader } from "@/components/ui/code-loader";
 import { CourseContent as CourseContentType } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Course() {
   const [, params] = useRoute("/course/:id");
   const courseId = params?.id;
   const [, setLocation] = useLocation();
   const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const { user } = useAuth();
 
   const { data: course, isLoading } = useQuery<any>({
     queryKey: [`/api/courses/${courseId}`],
     enabled: !!courseId,
+  });
+
+  const { data: userProgress } = useQuery<any>({
+    queryKey: [`/api/progress/${courseId}`],
+    enabled: !!courseId && !!user,
   });
 
   const [courseContent, setCourseContent] = useState<CourseContentType | null>(null);
@@ -153,11 +161,34 @@ export default function Course() {
           </Button>
           
           {courseContent && (
-            <CourseContent 
-              content={courseContent} 
-              activeStepIndex={activeStepIndex} 
-              setActiveStepIndex={setActiveStepIndex} 
-            />
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="order-2 lg:order-1">
+                <CourseContent 
+                  content={courseContent} 
+                  activeStepIndex={activeStepIndex} 
+                  setActiveStepIndex={setActiveStepIndex} 
+                />
+              </div>
+              
+              {user && (
+                <div className="order-1 lg:order-2">
+                  <GamefiedStepTracker
+                    courseId={parseInt(courseId!)}
+                    steps={courseContent.steps}
+                    completedSteps={userProgress?.completedSteps || []}
+                    currentStepId={userProgress?.currentStepId || 1}
+                    completionPercentage={userProgress?.completionPercentage || 0}
+                    onStepComplete={(stepId, newAchievements) => {
+                      // Update active step index when step is completed
+                      const stepIndex = courseContent.steps.findIndex(s => s.id === stepId);
+                      if (stepIndex !== -1 && stepIndex < courseContent.steps.length - 1) {
+                        setActiveStepIndex(stepIndex + 1);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           )}
         </div>
       </main>

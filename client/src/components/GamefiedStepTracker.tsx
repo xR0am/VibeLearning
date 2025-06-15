@@ -56,9 +56,18 @@ export default function GamefiedStepTracker({
 
   const markStepCompleteMutation = useMutation({
     mutationFn: async (stepId: number) => {
-      return await apiRequest(`/api/progress/${courseId}/step/${stepId}`, {
-        method: "POST"
+      const response = await fetch(`/api/progress/${courseId}/step/${stepId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to mark step complete");
+      }
+      
+      return response.json();
     },
     onSuccess: (data, stepId) => {
       setCelebratingStep(stepId);
