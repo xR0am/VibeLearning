@@ -74,14 +74,15 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface RepoInputFormProps {
-  onCourseGenerated: (course: CourseContent, sourceType: SourceType) => void;
+  onCourseGenerated: (course: CourseContent, sourceType: SourceType, formValues?: any) => void;
   onError?: () => void;
+  preservedFormData?: any;
 }
 
-export default function RepoInputForm({ onCourseGenerated, onError }: RepoInputFormProps) {
+export default function RepoInputForm({ onCourseGenerated, onError, preservedFormData }: RepoInputFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [sourceType, setSourceType] = useState<SourceType>("github");
+  const [sourceType, setSourceType] = useState<SourceType>(preservedFormData?.sourceType || "github");
   const { user, isAuthenticated } = useAuth();
   const { models, isLoading: isLoadingModels } = useModels();
   const [isApiKeyPromptOpen, setIsApiKeyPromptOpen] = useState(false);
@@ -89,7 +90,7 @@ export default function RepoInputForm({ onCourseGenerated, onError }: RepoInputF
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: preservedFormData || {
       sourceUrl: "",
       sourceType: "github",
       context: "",
@@ -185,13 +186,13 @@ export default function RepoInputForm({ onCourseGenerated, onError }: RepoInputF
       return;
     }
     
-    // Show generating state immediately
+    // Show generating state immediately and pass form values
     onCourseGenerated({
       title: "Generating...",
       repoUrl: data.sourceUrl,
       context: data.context,
       steps: []
-    }, sourceType);
+    }, sourceType, data);
     
     // Validate URL based on source type
     const isUrlValid = validateUrl(data.sourceUrl, data.sourceType);

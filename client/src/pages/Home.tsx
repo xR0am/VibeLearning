@@ -19,6 +19,7 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentSourceType, setCurrentSourceType] = useState<SourceType>("github");
   const [view, setView] = useState<'home' | 'course' | 'generating'>('home');
+  const [formData, setFormData] = useState<any>(null);
   
   // Reset active step when course content changes
   useEffect(() => {
@@ -28,8 +29,13 @@ export default function Home() {
     }
   }, [courseContent]);
 
-  const handleCourseSelect = (course: CourseContentType, sourceType: SourceType) => {
+  const handleCourseSelect = (course: CourseContentType, sourceType: SourceType, formValues?: any) => {
     setCurrentSourceType(sourceType);
+    
+    // Store form data if provided
+    if (formValues) {
+      setFormData(formValues);
+    }
     
     // If the course has empty steps, it means we're starting generation
     if (course.steps.length === 0) {
@@ -110,7 +116,11 @@ export default function Home() {
             <IntroSection />
             
             <div className="mb-8">
-              <RepoInputForm onCourseGenerated={handleCourseSelect} onError={handleGenerationError} />
+              <RepoInputForm 
+                onCourseGenerated={handleCourseSelect} 
+                onError={handleGenerationError}
+                preservedFormData={formData}
+              />
             </div>
             
             <PublicCourseLibrary />
