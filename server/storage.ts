@@ -236,6 +236,174 @@ export class DatabaseStorage implements IStorage {
         });
     }
   }
+
+  // Progress tracking methods
+  async getUserProgress(userId: string, courseId: number): Promise<UserProgress | undefined> {
+    const [progress] = await db
+      .select()
+      .from(userProgress)
+      .where(and(eq(userProgress.userId, userId), eq(userProgress.courseId, courseId)));
+    return progress || undefined;
+  }
+
+  async createUserProgress(progress: InsertUserProgress): Promise<UserProgress> {
+    const [newProgress] = await db
+      .insert(userProgress)
+      .values(progress)
+      .returning();
+    return newProgress;
+  }
+
+  async updateUserProgress(userId: string, courseId: number, updates: Partial<UserProgress>): Promise<UserProgress> {
+    const [updatedProgress] = await db
+      .update(userProgress)
+      .set({ ...updates, lastActivityAt: new Date() })
+      .where(and(eq(userProgress.userId, userId), eq(userProgress.courseId, courseId)))
+      .returning();
+    return updatedProgress;
+  }
+
+  async getUserProgressList(userId: string): Promise<UserProgress[]> {
+    return await db
+      .select()
+      .from(userProgress)
+      .where(eq(userProgress.userId, userId))
+      .orderBy(desc(userProgress.lastActivityAt));
+  }
+
+  async markStepComplete(userId: string, courseId: number, stepId: number): Promise<UserProgress> {
+    const currentProgress = await this.getUserProgress(userId, courseId);
+    
+    if (!currentProgress) {
+      // Create new progress if it doesn't exist
+      const course = await this.getCourse(courseId);
+      if (!course) throw new Error("Course not found");
+      
+      const courseContent = course.content as CourseContent;
+      const totalSteps = courseContent.steps?.length || 0;
+      
+      return await this.createUserProgress({
+        userId,
+        courseId,
+        completedSteps: [stepId],
+        currentStepId: stepId + 1,
+        totalSteps,
+        completionPercentage: Math.round((1 / totalSteps) * 100),
+        timeSpentMinutes: 0
+      });
+    }
+
+    // Update existing progress
+    const completedSteps = currentProgress.completedSteps || [];
+    const newCompletedSteps = [...new Set([...completedSteps, stepId])]; // Remove duplicates
+    const completionPercentage = Math.round((newCompletedSteps.length / currentProgress.totalSteps) * 100);
+    const isCompleted = newCompletedSteps.length === currentProgress.totalSteps;
+
+    return await this.updateUserProgress(userId, courseId, {
+      completedSteps: newCompletedSteps,
+      currentStepId: stepId + 1,
+      completionPercentage,
+      completedAt: isCompleted ? new Date() : null
+    });
+  }
+
+  // Achievement methods
+  async getAchievements(): Promise<Achievement[]> {
+    return await db
+      .select()
+      .from(achievements)
+      .where(eq(achievements.isActive, true))
+      .orderBy(achievements.name);
+  }
+
+  async getUserAchievements(userId: string): Promise<(UserAchievement & { achievement: Achievement })[]> {
+    return await db
+      .select({
+        id: userAchievements.id,
+        userId: userAchievements.userId,
+        achievementId: userAchievements.achievementId,
+        earnedAt: userAchievements.earnedAt,
+        achievement: achievements
+      })
+      .from(userAchievements)
+      .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+      .where(eq(userAchievements.userId, userId))
+      .orderBy(desc(userAchievements.earnedAt));
+  }
+
+  async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
+    const [newAchievement] = await db
+      .insert(achievements)
+      .values(achievement)
+      .returning();
+    return newAchievement;
+  }
+
+  async awardAchievement(userId: string, achievementId: number): Promise<UserAchievement> {
+    const [userAchievement] = await db
+      .insert(userAchievements)
+      .values({ userId, achievementId })
+      .onConflictDoNothing()
+      .returning();
+    return userAchievement;
+  }
+
+  async checkAndAwardAchievements(userId: string): Promise<UserAchievement[]> {
+    const allAchievements = await this.getAchievements();
+    const userAchievementList = await this.getUserAchievements(userId);
+    const earnedAchievementIds = new Set(userAchievementList.map(ua => ua.achievementId));
+    
+    const newAchievements: UserAchievement[] = [];
+    
+    for (const achievement of allAchievements) {
+      if (earnedAchievementIds.has(achievement.id)) continue;
+      
+      const criteria = achievement.criteria;
+      let shouldAward = false;
+      
+      switch (criteria.type) {
+        case "course_completion": {
+          const completedCourses = await db.select({ count: sql<number>`count(*)` })
+            .from(userProgress)
+            .where(and(
+              eq(userProgress.userId, userId),
+              eq(userProgress.completionPercentage, 100)
+            ));
+          shouldAward = (completedCourses[0]?.count || 0) >= criteria.value;
+          break;
+        }
+        case "streak": {
+          const progressList = await this.getUserProgressList(userId);
+          const maxStreak = Math.max(...progressList.map(p => p.streakDays || 0), 0);
+          shouldAward = maxStreak >= criteria.value;
+          break;
+        }
+        case "time_spent": {
+          const totalTime = await db.select({ total: sql<number>`sum(time_spent_minutes)` })
+            .from(userProgress)
+            .where(eq(userProgress.userId, userId));
+          shouldAward = (totalTime[0]?.total || 0) >= criteria.value;
+          break;
+        }
+        case "courses_count": {
+          const courseCount = await db.select({ count: sql<number>`count(*)` })
+            .from(userProgress)
+            .where(eq(userProgress.userId, userId));
+          shouldAward = (courseCount[0]?.count || 0) >= criteria.value;
+          break;
+        }
+      }
+      
+      if (shouldAward) {
+        const newAchievement = await this.awardAchievement(userId, achievement.id);
+        if (newAchievement) {
+          newAchievements.push(newAchievement);
+        }
+      }
+    }
+    
+    return newAchievements;
+  }
 }
 
 export const storage = new DatabaseStorage();
