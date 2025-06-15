@@ -258,6 +258,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error generating course:", error);
+      
+      // Check if this is a structured error from OpenRouter
+      if (error instanceof Error) {
+        try {
+          const structuredError = JSON.parse(error.message);
+          if (structuredError.type && structuredError.message && structuredError.suggestions) {
+            // Pass through the structured error
+            res.status(500).json({ 
+              message: error.message // This contains the JSON string
+            });
+            return;
+          }
+        } catch {
+          // Not a structured error, continue with regular handling
+        }
+      }
+      
       res.status(error instanceof z.ZodError ? 400 : 500).json({ 
         message: "Failed to generate course",
         error: error instanceof Error ? error.message : "Unknown error"
