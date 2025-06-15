@@ -12,6 +12,7 @@ import Course from "@/pages/Course";
 import Admin from "@/pages/Admin";
 import LoaderDemo from "@/pages/LoaderDemo";
 import HowTo from "@/pages/HowTo";
+import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
 
@@ -19,6 +20,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/profile" component={Profile} />
       <Route path="/courses/user" component={UserCourses} />
       <Route path="/courses/public" component={PublicCourses} />

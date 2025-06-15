@@ -1,4 +1,4 @@
-import { UserIcon, LogIn, Settings, LogOut, ShieldAlert, HelpCircle, Globe, FileText, CodeIcon } from "lucide-react";
+import { UserIcon, LogIn, Settings, LogOut, ShieldAlert, HelpCircle, Globe, FileText, CodeIcon, BarChart3 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +31,14 @@ export default function Header() {
             </Link>
           </div>
           <div className="flex items-center space-x-3">
+            {isAuthenticated && (
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-1">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </Button>
+              </Link>
+            )}
             <Link href="/courses/public">
               <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-1">
                 <Globe className="h-4 w-4" />
