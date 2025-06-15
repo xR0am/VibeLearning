@@ -76,10 +76,11 @@ type FormData = z.infer<typeof formSchema>;
 interface RepoInputFormProps {
   onCourseGenerated: (course: CourseContent, sourceType: SourceType, formValues?: any) => void;
   onError?: () => void;
+  onProcessingPhase?: () => void;
   preservedFormData?: any;
 }
 
-export default function RepoInputForm({ onCourseGenerated, onError, preservedFormData }: RepoInputFormProps) {
+export default function RepoInputForm({ onCourseGenerated, onError, onProcessingPhase, preservedFormData }: RepoInputFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [sourceType, setSourceType] = useState<SourceType>(preservedFormData?.sourceType || "github");
@@ -108,6 +109,10 @@ export default function RepoInputForm({ onCourseGenerated, onError, preservedFor
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: FormData) => {
       const response = await apiRequest("POST", "/api/courses/generate", data);
+      
+      // Trigger processing phase when we get the response
+      onProcessingPhase?.();
+      
       return response.json();
     },
     onSuccess: (data: CourseContent) => {

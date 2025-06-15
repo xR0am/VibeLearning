@@ -20,6 +20,7 @@ export default function Home() {
   const [currentSourceType, setCurrentSourceType] = useState<SourceType>("github");
   const [view, setView] = useState<'home' | 'course' | 'generating'>('home');
   const [formData, setFormData] = useState<any>(null);
+  const [generationPhase, setGenerationPhase] = useState<'requesting' | 'processing'>('requesting');
   
   // Reset active step when course content changes
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function Home() {
     if (course.steps.length === 0) {
       setIsGenerating(true);
       setView('generating');
+      setGenerationPhase('requesting');
       
       // Scroll to top
       window.scrollTo({
@@ -54,6 +56,7 @@ export default function Home() {
     setIsGenerating(false);
     setCourseContent(course);
     setView('course');
+    setGenerationPhase('requesting'); // Reset for next time
     
     // Scroll to top
     window.scrollTo({
@@ -66,12 +69,18 @@ export default function Home() {
     // Reset to home view when generation fails
     setIsGenerating(false);
     setView('home');
+    setGenerationPhase('requesting'); // Reset for next attempt
     
     // Scroll to top
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
+  };
+
+  const handleProcessingPhase = () => {
+    // Called when API response is received and processing begins
+    setGenerationPhase('processing');
   };
   
   const handleBackToHome = () => {
@@ -101,8 +110,14 @@ export default function Home() {
           >
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <h2 className="text-xl font-semibold mb-2">Generating Course</h2>
-              <p className="text-muted-foreground">This may take a few moments...</p>
+              <h2 className="text-xl font-semibold mb-2">
+                {generationPhase === 'requesting' ? 'Generating Course' : 'Creating Your Course'}
+              </h2>
+              <p className="text-muted-foreground">
+                {generationPhase === 'requesting' 
+                  ? 'This may take a few moments...' 
+                  : 'Response received, creating your course...'}
+              </p>
             </div>
           </motion.div>
         ) : view === 'home' ? (
@@ -119,6 +134,7 @@ export default function Home() {
               <RepoInputForm 
                 onCourseGenerated={handleCourseSelect} 
                 onError={handleGenerationError}
+                onProcessingPhase={handleProcessingPhase}
                 preservedFormData={formData}
               />
             </div>
