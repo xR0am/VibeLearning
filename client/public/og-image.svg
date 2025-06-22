@@ -29,8 +29,8 @@
     <!-- Profile background circle -->
     <circle cx="60" cy="60" r="55" fill="url(#textGradient)" opacity="0.3"/>
     <circle cx="60" cy="60" r="52" fill="#1e293b"/>
-    <!-- Profile image - zoomed and centered -->
-    <image x="35" y="35" width="50" height="50" href="/profile.png" clip-path="url(#profileClip)" preserveAspectRatio="xMidYMid slice"/>
+    <!-- Profile image - properly sized and positioned -->
+    <image x="10" y="10" width="100" height="100" href="/profile.png" clip-path="url(#profileClip)"/>
   </g>
   
   <!-- Code icon -->
@@ -73,7 +73,7 @@
   </g>
   
   <!-- Built on Replit badge - using official badge -->
-  <image x="475" y="530" width="250" height="70" href="https://replit.com/badge?caption=Built%20on%20Replit&theme=dark"/>
+  <image x="475" y="530" width="250" height="70" href="https://replit.com/badge?caption=Built%20on%20Replit&amp;theme=dark"/>
   
   <!-- Bottom accent line -->
   <rect x="0" y="620" width="1200" height="10" fill="url(#textGradient)" opacity="0.3"/>
