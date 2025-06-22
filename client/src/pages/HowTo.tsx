@@ -246,7 +246,7 @@ export default function HowTo() {
               
               <CardContent className="space-y-6">
                 <p className="text-sm text-muted-foreground mb-4">
-                  Each course in DevCourse is automatically analyzed and assigned a complexity level. This helps you understand the difficulty level and estimated knowledge required before beginning.
+                  Each course in VibeLearning is automatically analyzed and assigned a complexity level. This helps you understand the difficulty level and estimated knowledge required before beginning.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -351,23 +351,23 @@ export default function HowTo() {
                   Frequently Asked Questions
                 </CardTitle>
                 <CardDescription>
-                  Common questions and answers about using DevCourse effectively.
+                  Common questions and answers about using VibeLearning effectively.
                 </CardDescription>
               </CardHeader>
               
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1">
-                    <AccordionTrigger>What is DevCourse and how does it work?</AccordionTrigger>
+                    <AccordionTrigger>What is VibeLearning and how does it work?</AccordionTrigger>
                     <AccordionContent>
-                      DevCourse is an AI-powered learning platform that automatically generates personalized courses based on GitHub repositories or llms.txt files. It uses large language models (LLMs) to analyze the source material and create step-by-step learning content tailored to your specific needs and technical level.
+                      VibeLearning is an AI-powered learning platform that automatically generates personalized courses based on GitHub repositories or llms.txt files. It uses large language models (LLMs) to analyze the source material and create step-by-step learning content tailored to your specific needs and technical level.
                     </AccordionContent>
                   </AccordionItem>
                   
                   <AccordionItem value="item-2">
-                    <AccordionTrigger>Do I need to pay for using DevCourse?</AccordionTrigger>
+                    <AccordionTrigger>Do I need to pay for using VibeLearning?</AccordionTrigger>
                     <AccordionContent>
-                      DevCourse itself is free to use, but it requires an OpenRouter API key to generate courses. OpenRouter provides free credits when you sign up, which may be sufficient for your needs. If you need to generate more courses, you'll need to add funds to your OpenRouter account.
+                      VibeLearning itself is free to use, but it requires an OpenRouter API key to generate courses. OpenRouter provides free credits when you sign up, which may be sufficient for your needs. If you need to generate more courses, you'll need to add funds to your OpenRouter account.
                     </AccordionContent>
                   </AccordionItem>
                   
@@ -386,9 +386,9 @@ export default function HowTo() {
                   </AccordionItem>
                   
                   <AccordionItem value="item-5">
-                    <AccordionTrigger>Which language models does DevCourse use?</AccordionTrigger>
+                    <AccordionTrigger>Which language models does VibeLearning use?</AccordionTrigger>
                     <AccordionContent>
-                      DevCourse uses OpenRouter to provide access to various large language models, including free models like DeepSeek, Llama, and more. When you add your OpenRouter API key, you'll have access to all the models available on your account, including any premium models you've enabled.
+                      VibeLearning uses OpenRouter to provide access to various large language models, including free models like DeepSeek, Llama, and more. When you add your OpenRouter API key, you'll have access to all the models available on your account, including any premium models you've enabled.
                     </AccordionContent>
                   </AccordionItem>
                   

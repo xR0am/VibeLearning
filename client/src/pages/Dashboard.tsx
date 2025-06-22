@@ -22,7 +22,7 @@ export default function Dashboard() {
         <Card>
           <CardContent className="p-8 text-center">
             <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-semibold mb-2">Welcome to DevCourse</h2>
+            <h2 className="text-xl font-semibold mb-2">Welcome to VibeLearning</h2>
             <p className="text-muted-foreground mb-4">
               Sign in to track your learning progress and earn achievements.
             </p>
