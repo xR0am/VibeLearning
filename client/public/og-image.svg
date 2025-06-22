@@ -77,10 +77,12 @@
     </text>
   </g>
   
-  <!-- Built on Replit badge - centered using group transform -->
-  <g transform="translate(600, 565)">
-    <image x="-125" y="-25" width="250" height="50" href="https://replit.com/badge?caption=Built%20on%20Replit&amp;theme=dark"/>
-  </g>
+  <!-- Built on Replit badge - mathematically centered -->
+  <foreignObject x="0" y="540" width="1200" height="50">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="text-align: center; width: 100%;">
+      <img src="https://replit.com/badge?caption=Built%20on%20Replit&amp;theme=dark" alt="Built on Replit" style="height: 50px;"/>
+    </div>
+  </foreignObject>
   
   <!-- Bottom accent line -->
   <rect x="0" y="620" width="1200" height="10" fill="url(#textGradient)" opacity="0.3"/>
