@@ -9,6 +9,11 @@
 
 VibeLearning is an advanced AI-powered learning platform that generates personalized developer courses through intelligent repository analysis and adaptive learning techniques, featuring gamified progress tracking and comprehensive error handling.
 
+## Try it out
+I am hosting a free version on Replit where you can bring your own OpenRouter key and courses can stay private in your database or make them public for others to learn with you 
+
+[![Try with Replit Badge](https://replit.com/badge?caption=Open%20app%20hosted%20on%20Replit)](https://vibe-learning.replit.app/)
+
 ## 🚀 Features
 
 ### Core Learning Platform
