@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://vibelearning.replit.app/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1
+
+# Disallow sensitive areas
+Disallow: /api/
+Disallow: /auth/
+Disallow: /admin/
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /node_modules/
+Disallow: /dist/
+Disallow: /build/
+
+# Allow important static files
+Allow: /og-image.svg
+Allow: /favicon.svg
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Block specific bots if needed
+# User-agent: BadBot
+# Disallow: /
