@@ -421,7 +421,7 @@ export default function HowTo() {
                 </p>
                 <div className="flex gap-4">
                   <Button variant="outline" asChild>
-                    <a href="https://github.com/username/devcourse" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/username/vibelearning" target="_blank" rel="noopener noreferrer">
                       <Github className="mr-2 h-4 w-4" />
                       GitHub Repository
                     </a>
