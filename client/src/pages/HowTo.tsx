@@ -45,10 +45,10 @@ export default function HowTo() {
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight mb-2 gradient-heading flex items-center justify-center gap-2">
             <HelpCircle className="h-7 w-7" />
-            How to Use DevCourse
+            How to Use VibeLearning
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Learn how to get the most out of DevCourse, from setting up your API key to understanding course complexity levels.
+            Learn how to get the most out of VibeLearning, from setting up your API key to understanding course complexity levels.
           </p>
         </div>
         
@@ -80,7 +80,7 @@ export default function HowTo() {
               <CardHeader>
                 <CardTitle className="text-xl font-bold flex items-center gap-2">
                   <Lightbulb className="h-5 w-5 text-primary" />
-                  Getting Started with DevCourse
+                  Getting Started with VibeLearning
                 </CardTitle>
                 <CardDescription>
                   Learn the basics of generating and exploring personalized courses.
@@ -198,10 +198,10 @@ export default function HowTo() {
                   <div className="space-y-4">
                     <h3 className="font-medium text-lg mb-1 flex items-center gap-2">
                       <Key className="h-5 w-5 text-primary" />
-                      Step 2: Add API Key to DevCourse
+                      Step 2: Add API Key to VibeLearning
                     </h3>
                     <ol className="space-y-3 list-decimal pl-5 text-sm">
-                      <li>Sign in to DevCourse using the login button in the top right corner</li>
+                      <li>Sign in to VibeLearning using the login button in the top right corner</li>
                       <li>Navigate to your Profile by clicking your username in the top right</li>
                       <li>Look for the "API Key Settings" section</li>
                       <li>Paste your OpenRouter API key into the field</li>

@@ -26,7 +26,7 @@ export default function Header() {
                 <span className="text-primary text-3xl mr-2 flex items-center">
                   <CodeIcon className="h-8 w-8" />
                 </span>
-                <h1 className="text-2xl font-bold gradient-heading">DevCourse</h1>
+                <h1 className="text-2xl font-bold gradient-heading">VibeLearning</h1>
               </div>
             </Link>
           </div>
