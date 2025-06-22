@@ -1,3 +1,10 @@
+<div align="center">
+  <p>Support the dev with crypto tips, powered by tip.md</p>
+  <a href="https://tip.md/xR0am">
+    <img src="https://tip.md/badge.svg" alt="Tip in Crypto" width="150">
+  </a>
+</div>
+
 # VibeLearning
 
 VibeLearning is an advanced AI-powered learning platform that generates personalized developer courses through intelligent repository analysis and adaptive learning techniques, featuring gamified progress tracking and comprehensive error handling.
@@ -197,6 +204,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Documentation**: Comprehensive guides available in the application's "How To" section
 - **Issues**: Report bugs and request features via GitHub Issues
 - **Community**: Join discussions and share learning experiences
+
+---
+<div align="center">
+  <p>Support the dev with crypto tips, powered by tip.md</p>
+  <a href="https://tip.md/xR0am">
+    <img src="https://tip.md/badge.svg" alt="Tip in Crypto" width="150">
+  </a>
+</div>
 
 ---
 
