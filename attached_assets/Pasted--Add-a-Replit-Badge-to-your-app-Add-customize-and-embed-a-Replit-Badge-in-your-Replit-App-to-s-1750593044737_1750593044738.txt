@@ -1,0 +1,157 @@
+# Add a Replit Badge to your app
+
+> Add, customize, and embed a Replit Badge in your Replit App to showcase your project and link back to your cover page.
+
+The Replit Badge allows you to showcase that you built your app on Replit. When added to your Replit App, it links back to your App's cover page so visitors can learn more about your creations.
+
+## Features
+
+The Replit Badge enhances your app with official Replit branding while providing easy navigation back to your project.
+
+* **Simple integration**: Add the badge to any app with a single line of code
+* **Customizable appearance**: Choose from multiple themes and positions
+* **Flexible implementation**: Use the script tag or custom HTML/CSS options
+* **Markdown support**: Embed badges in your GitHub repository and other Markdown files
+
+## Usage
+
+### Adding the badge
+
+You can add a Badge to any Replit App with an index page. Websites created with the official HTML template have this Badge added by default.
+
+1. **Locate your index.html file**\
+   Go to your Replit App's file browser and find `index.html`
+   <Frame>
+     <img src="https://mintlify.s3.us-west-1.amazonaws.com/replit/images/misc/img-indexfile.png" alt="File browser showing index.html file" width="400" height="400" />
+   </Frame>
+
+2. **Add the badge script**\
+   Add the following code before the closing `</body>` tag:
+   ```html
+   <script
+     src="https://replit.com/public/js/replit-badge-v2.js"
+     theme="dark"
+     position="bottom-right"
+   ></script>
+   ```
+   <Frame>
+     <img src="https://mintlify.s3.us-west-1.amazonaws.com/replit/images/misc/img-htmlcode.png" alt="HTML code example showing badge script" />
+   </Frame>
+
+### Testing your badge
+
+1. **Run your app**\
+   Run your Replit App, then select **Open in a new tab**
+   <Frame>
+     <img src="https://mintlify.s3.us-west-1.amazonaws.com/replit/images/misc/img-openintab.png" alt="Open in a new tab button" />
+   </Frame>
+
+2. **View the badge**\
+   Your Badge should appear in the lower right corner. This is what visitors to your page will see.
+   <Frame>
+     <img src="https://mintlify.s3.us-west-1.amazonaws.com/replit/images/misc/badge-preview.png" alt="Badge Preview" />
+   </Frame>
+
+3. **Test the link**\
+   Select your Badge to verify it links back to the Replit App's cover page
+
+### Customizing your badge
+
+<Accordion title="Changing the color theme">
+  You can change the color of your Badge by modifying the `theme` attribute with any of these colors: dark, light, red, orange, yellow, lime, green, teal, blue, blurple, purple, magenta, or pink.
+
+  ```html
+  <script
+    src="https://replit.com/public/js/replit-badge-v2.js"
+    theme="pink"
+    position="bottom-right"
+  ></script>
+  ```
+</Accordion>
+
+<Accordion title="Changing the position">
+  You can change the position of your Badge by modifying the `position` attribute with one of these values: `top-left`, `top-right`, `bottom-left`, or `bottom-right`.
+
+  ```html
+  <script
+    src="https://replit.com/public/js/replit-badge-v2.js"
+    theme="dark"
+    position="top-left"
+  ></script>
+  ```
+
+  <Note>
+    If the position isn't changing, check the browser console for more information—you may have specified an invalid position.
+  </Note>
+</Accordion>
+
+<Accordion title="Removing the badge">
+  If the Badge was added by default and you want to remove it, delete the script from `index.html`:
+
+  ```html
+  <!-- Delete this -->
+  <script src="https://replit.com/public/js/replit-badge-v2.js"></script>
+  ```
+</Accordion>
+
+### Advanced options
+
+<Accordion title="Creating custom badges">
+  If the default configurations don't meet your needs, you can create custom badges with standard HTML and CSS.
+
+  Badges are hosted on `https://replit.com/badge`, allowing you to embed them as images and further style them with CSS.
+
+  ```html
+  <style>
+    #replitBadge {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+    }
+  </style>
+
+  <img
+    src="https://replit.com/badge?theme=light"
+    id="replitBadge"
+    alt="Replit Badge"
+  />
+  ```
+
+  You can also use additional options not available in the script:
+
+  **Custom caption** (maximum 30 characters):
+
+  ```
+  https://replit.com/badge?caption=Amazing%20Badges
+  ```
+
+  <Frame>
+    ![Amazing Replit Badge](https://replit.com/badge?caption=Amazing%20Badges)
+  </Frame>
+
+  **Smaller variant**:
+
+  ```
+  https://replit.com/badge?caption=Amazing%20Badges&variant=small
+  ```
+
+  <Frame>
+    ![Amazing small Replit Badge](https://replit.com/badge?caption=Amazing%20Badges\&variant=small)
+  </Frame>
+</Accordion>
+
+<Accordion title="Embedding in Markdown">
+  You can showcase your Replit Badge by embedding it in your repository README. This Markdown snippet combines a link and image to redirect users to your Replit App:
+
+  ```
+  [![Try with Replit Badge](https://replit.com/badge?caption=Try%20with%20Replit)](https://replit.com/)
+  ```
+
+  Try selecting this:
+
+  <Frame>
+    [![Try with Replit Badge](https://replit.com/badge?caption=Try%20with%20Replit)](https://replit.com/)
+  </Frame>
+</Accordion>
+
+Share your feedback about this feature in the Community!
